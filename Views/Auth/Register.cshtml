@@ -1,0 +1,32 @@
+@{
+    ViewData["Title"] = "Registro de Usuario";
+}
+<h2>Registro de Usuario</h2>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success">@ViewBag.Message</div>
+}
+
+<form asp-action="Register" method="post">
+    <div class="form-group">
+        <label for="usuario">Usuario</label>
+        <input type="text" class="form-control" id="usuario" name="usuario" required />
+    </div>
+    <div class="form-group">
+        <label for="nombre">Nombre completo</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" required />
+    </div>
+    <div class="form-group">
+        <label for="clave">Clave</label>
+        <input type="password" class="form-control" id="clave" name="clave" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Registrar</button>
+</form>
+<p>
+    ¿Ya tienes cuenta? <a asp-action="Login">Inicia sesión aquí</a>
+</p>
