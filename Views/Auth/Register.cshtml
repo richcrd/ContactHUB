@@ -1,32 +1,35 @@
 @{
     ViewData["Title"] = "Registro de Usuario";
 }
-<h2>Registro de Usuario</h2>
-
-@if (ViewBag.Error != null)
-{
-    <div class="alert alert-danger">@ViewBag.Error</div>
-}
-@if (ViewBag.Message != null)
-{
-    <div class="alert alert-success">@ViewBag.Message</div>
-}
-
-<form asp-action="Register" method="post">
-    <div class="form-group">
-        <label for="usuario">Usuario</label>
-        <input type="text" class="form-control" id="usuario" name="usuario" required />
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow-lg p-4" style="width: 400px;">
+        <h2 class="text-center mb-4">Registro de Usuario</h2>
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+        @if (ViewBag.Message != null)
+        {
+            <div class="alert alert-success">@ViewBag.Message</div>
+        }
+        <form asp-action="Register" method="post">
+            <div class="mb-3">
+                <label for="usuario" class="form-label">Usuario</label>
+                <input type="text" class="form-control" id="usuario" name="usuario" placeholder="Ingrese su usuario" required minlength="4" maxlength="20" pattern="^[a-zA-Z0-9_]+$" title="Solo letras, números y guion bajo. Mínimo 4 caracteres." />
+            </div>
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese su nombre" required minlength="2" maxlength="50" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$" title="Solo letras y espacios. Mínimo 2 caracteres." />
+            </div>
+            <div class="mb-3">
+                <label for="clave" class="form-label">Clave</label>
+                <input type="password" class="form-control" id="clave" name="clave" placeholder="Ingrese su clave" required minlength="6" maxlength="30" title="La clave debe tener al menos 6 caracteres." />
+            </div>
+            <button type="submit" class="btn btn-success w-100">Registrar</button>
+        </form>
+        <hr />
+        <p class="text-center mb-0">
+            ¿Ya tienes cuenta? <a asp-action="Login">Inicia sesión aquí</a>
+        </p>
     </div>
-    <div class="form-group">
-        <label for="nombre">Nombre completo</label>
-        <input type="text" class="form-control" id="nombre" name="nombre" required />
-    </div>
-    <div class="form-group">
-        <label for="clave">Clave</label>
-        <input type="password" class="form-control" id="clave" name="clave" required />
-    </div>
-    <button type="submit" class="btn btn-primary">Registrar</button>
-</form>
-<p>
-    ¿Ya tienes cuenta? <a asp-action="Login">Inicia sesión aquí</a>
-</p>
+</div>

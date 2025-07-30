@@ -25,6 +25,17 @@ namespace ContactHUB.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string usuario, string clave)
         {
+            // Validaciones del lado del servidor
+            if (string.IsNullOrWhiteSpace(usuario) || usuario.Length < 4 || usuario.Length > 10 || !System.Text.RegularExpressions.Regex.IsMatch(usuario, "^[a-zA-Z0-9_]+$"))
+            {
+                ViewBag.Error = "El usuario debe tener entre 4 y 10 caracteres y solo puede contener letras, números y guion bajo.";
+                return View();
+            }
+            if (string.IsNullOrWhiteSpace(clave) || clave.Length < 8 || clave.Length > 30)
+            {
+                ViewBag.Error = "La clave debe tener entre 8 y 30 caracteres.";
+                return View();
+            }
             try
             {
                 var user = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuario && u.Clave == clave && u.Estado.Nombre == "Activo");
@@ -40,7 +51,7 @@ namespace ContactHUB.Controllers
                     await HttpContext.SignInAsync("Cookies", principal);
                     return RedirectToAction("Index", "Home");
                 }
-                ViewBag.Error = "Usuario o clave incorrectos, o usuario inactivo.";
+                ViewBag.Error = "Usuario o clave incorrectos";
             }
             catch (Exception ex)
             {
@@ -59,6 +70,21 @@ namespace ContactHUB.Controllers
         [HttpPost]
         public IActionResult Register(string usuario, string nombre, string clave)
         {
+            if (string.IsNullOrWhiteSpace(usuario) || usuario.Length < 4 || usuario.Length > 10 || !System.Text.RegularExpressions.Regex.IsMatch(usuario, "^[a-zA-Z0-9_]+$"))
+            {
+                ViewBag.Error = "El usuario debe tener entre 4 y 10 caracteres y solo puede contener letras, números y guion bajo.";
+                return View();
+            }
+            if (string.IsNullOrWhiteSpace(nombre) || nombre.Length < 4 || nombre.Length > 50 || !System.Text.RegularExpressions.Regex.IsMatch(nombre, "^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
+            {
+                ViewBag.Error = "El nombre debe tener entre 4 y 50 caracteres y solo puede contener letras y espacios.";
+                return View();
+            }
+            if (string.IsNullOrWhiteSpace(clave) || clave.Length < 8 || clave.Length > 30)
+            {
+                ViewBag.Error = "La clave debe tener entre 8 y 30 caracteres.";
+                return View();
+            }
             try
             {
                 // Estado activo por defecto (IdEstado = 1)
