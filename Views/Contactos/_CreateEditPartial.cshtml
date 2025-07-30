@@ -1,0 +1,71 @@
+@model ContactHUB.Models.Contacto
+@{
+    var departamentos = ViewBag.Departamentos as List<ContactHUB.Models.Departamento>;
+    var etiquetas = ViewBag.Etiquetas as List<ContactHUB.Models.Etiqueta>;
+    int[] selectedEtiquetas = ViewBag.SelectedEtiquetas as int[] ?? new int[0];
+    bool isEdit = Model != null && Model.IdContacto != 0;
+}
+
+<form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+    @if (isEdit)
+    {
+        <input type="hidden" name="IdContacto" value="@Model.IdContacto" />
+    }
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" name="Nombre" class="form-control" value="@Model?.Nombre" required />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Apellido</label>
+        <input type="text" name="Apellido" class="form-control" value="@Model?.Apellido" required />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Teléfono</label>
+        <input type="text" name="Telefono" class="form-control" value="@Model?.Telefono" required />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Correo</label>
+        <input type="email" name="Correo" class="form-control" value="@Model?.Correo" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Dirección</label>
+        <input type="text" name="Direccion" class="form-control" value="@Model?.Direccion" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Departamento</label>
+        <select name="Id_Departamento" class="form-select">
+            <option value="">Seleccione...</option>
+            @foreach (var dep in departamentos)
+            {
+                if (Model?.Id_Departamento == dep.IdDepartamento)
+                {
+                    <option value="@dep.IdDepartamento" selected>@dep.Nombre</option>
+                }
+                else
+                {
+                    <option value="@dep.IdDepartamento">@dep.Nombre</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Etiquetas</label>
+        <select name="etiquetas" class="form-select" multiple>
+            @foreach (var et in etiquetas)
+            {
+                if (selectedEtiquetas.Contains(et.IdEtiqueta))
+                {
+                    <option value="@et.IdEtiqueta" selected>@et.Nombre</option>
+                }
+                else
+                {
+                    <option value="@et.IdEtiqueta">@et.Nombre</option>
+                }
+            }
+        </select>
+        <small class="form-text text-muted">Ctrl+Click para seleccionar varias</small>
+    </div>
+    <div class="mb-3 text-end">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+</form>

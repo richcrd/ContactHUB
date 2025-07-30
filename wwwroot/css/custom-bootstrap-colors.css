@@ -1,0 +1,36 @@
+/* Colores personalizados para Bootstrap */
+.bg-custom-azul {
+    background-color: #799EFF !important;
+    color: #fff !important;
+}
+.bg-custom-verde {
+    background-color: #22c55e !important;
+    color: #fff !important;
+}
+.bg-custom-naranja {
+    background-color: #f59e42 !important;
+    color: #fff !important;
+}
+.bg-custom-amarillo {
+    background-color: #FFDE63 !important;
+    color: #fff !important;
+}
+.bg-custom-verderosa {
+    background-color: #93DA97 !important;
+    color: #fff !important;
+}
+.text-custom-verderosa {
+    color: #93DA97 !important;
+}
+.text-custom-amarillo {
+    color: #FFDE63 !important;
+}
+.text-custom-azul {
+    color: #799EFF !important;
+}
+.text-custom-verde {
+    color: #22c55e !important;
+}
+.text-custom-naranja {
+    color: #f59e42 !important;
+}

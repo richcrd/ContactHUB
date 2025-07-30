@@ -3,6 +3,7 @@ using ContactHUB.Data;
 using ContactHUB.Models;
 using System.Linq;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 
 namespace ContactHUB.Controllers
 {
@@ -38,18 +39,23 @@ namespace ContactHUB.Controllers
             }
             try
             {
-                var user = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuario && u.Clave == clave && u.Estado.Nombre == "Activo");
+                var user = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuario && u.Estado.Nombre == "Activo");
                 if (user != null)
                 {
-                    var claims = new List<System.Security.Claims.Claim>
+                    var hasher = new PasswordHasher<Usuario>();
+                    var result = hasher.VerifyHashedPassword(user, user.Clave, clave);
+                    if (result == PasswordVerificationResult.Success)
                     {
-                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.UsuarioNombre),
-                        new System.Security.Claims.Claim("Nombre", user.Nombre)
-                    };
-                    var identity = new System.Security.Claims.ClaimsIdentity(claims, "Cookies");
-                    var principal = new System.Security.Claims.ClaimsPrincipal(identity);
-                    await HttpContext.SignInAsync("Cookies", principal);
-                    return RedirectToAction("Index", "Home");
+                        var claims = new List<System.Security.Claims.Claim>
+                        {
+                            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.UsuarioNombre),
+                            new System.Security.Claims.Claim("Nombre", user.Nombre)
+                        };
+                        var identity = new System.Security.Claims.ClaimsIdentity(claims, "Cookies");
+                        var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+                        await HttpContext.SignInAsync("Cookies", principal);
+                        return RedirectToAction("Index", "Home");
+                    }
                 }
                 ViewBag.Error = "Usuario o clave incorrectos";
             }
@@ -94,13 +100,14 @@ namespace ContactHUB.Controllers
                     ViewBag.Error = "El usuario ya existe.";
                     return View();
                 }
+                var hasher = new PasswordHasher<Usuario>();
                 var user = new Usuario
                 {
                     UsuarioNombre = usuario,
                     Nombre = nombre,
-                    Clave = clave,
                     Id_Estado = 1 // Activo
                 };
+                user.Clave = hasher.HashPassword(user, clave);
                 _context.Usuarios.Add(user);
                 _context.SaveChanges();
                 ViewBag.Message = "Usuario registrado exitosamente.";

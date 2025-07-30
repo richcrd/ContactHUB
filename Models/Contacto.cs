@@ -16,9 +16,9 @@ public class Contacto
     public string Telefono { get; set; } = null!;
     public string? Correo { get; set; }
     public string? Direccion { get; set; }
-    public int Id_Departamento { get; set; }
-    public Departamento Departamento { get; set; } = null!;
-    public int Id_Estado { get; set; }
-    public Estado Estado { get; set; } = null!;
+public int? Id_Departamento { get; set; }
+public Departamento? Departamento { get; set; }
+public int? Id_Estado { get; set; }
+public Estado? Estado { get; set; }
     public ICollection<ContactoEtiqueta> ContactoEtiquetas { get; set; } = new List<ContactoEtiqueta>();
 }

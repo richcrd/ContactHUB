@@ -34,13 +34,15 @@ public class ContactDbContext : DbContext
         modelBuilder.Entity<Estado>()
             .HasMany(e => e.Contactos)
             .WithOne(c => c.Estado)
-            .HasForeignKey(c => c.Id_Estado);
+            .HasForeignKey(c => c.Id_Estado)
+            .IsRequired(false);
 
         // Departamento
         modelBuilder.Entity<Departamento>()
             .HasMany(d => d.Contactos)
             .WithOne(c => c.Departamento)
-            .HasForeignKey(c => c.Id_Departamento);
+            .HasForeignKey(c => c.Id_Departamento)
+            .IsRequired(false);
 
         // Usuario
         modelBuilder.Entity<Usuario>()
@@ -63,6 +65,16 @@ public class ContactDbContext : DbContext
         // ContactoEtiqueta (Many-to-Many)
         modelBuilder.Entity<ContactoEtiqueta>()
             .HasKey(ce => new { ce.IdContacto, ce.IdEtiqueta });
+        modelBuilder.Entity<ContactoEtiqueta>()
+            .HasOne(ce => ce.Contacto)
+            .WithMany(c => c.ContactoEtiquetas)
+            .HasForeignKey(ce => ce.IdContacto)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContactoEtiqueta>()
+            .HasOne(ce => ce.Etiqueta)
+            .WithMany(e => e.ContactoEtiquetas)
+            .HasForeignKey(ce => ce.IdEtiqueta)
+            .OnDelete(DeleteBehavior.Restrict);
 
         base.OnModelCreating(modelBuilder);
     }

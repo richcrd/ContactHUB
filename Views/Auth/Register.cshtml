@@ -23,7 +23,12 @@
             </div>
             <div class="mb-3">
                 <label for="clave" class="form-label">Clave</label>
-                <input type="password" class="form-control" id="clave" name="clave" placeholder="Ingrese su clave" required minlength="6" maxlength="30" title="La clave debe tener al menos 6 caracteres." />
+                <div class="input-group">
+                    <input type="password" class="form-control" id="clave" name="clave" placeholder="Ingrese su clave" required minlength="6" maxlength="30" title="La clave debe tener al menos 6 caracteres." />
+                    <button type="button" class="btn btn-outline-secondary" id="toggleClave" tabindex="-1">
+                        <span id="iconClave" class="bi bi-eye"></span>
+                    </button>
+                </div>
             </div>
             <button type="submit" class="btn btn-success w-100">Registrar</button>
         </form>
@@ -31,5 +36,25 @@
         <p class="text-center mb-0">
             ¿Ya tienes cuenta? <a asp-action="Login">Inicia sesión aquí</a>
         </p>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const claveInput = document.getElementById('clave');
+                const toggleClave = document.getElementById('toggleClave');
+                const iconClave = document.getElementById('iconClave');
+                if (toggleClave) {
+                    toggleClave.addEventListener('click', function () {
+                        if (claveInput.type === 'password') {
+                            claveInput.type = 'text';
+                            iconClave.classList.remove('bi-eye');
+                            iconClave.classList.add('bi-eye-slash');
+                        } else {
+                            claveInput.type = 'password';
+                            iconClave.classList.remove('bi-eye-slash');
+                            iconClave.classList.add('bi-eye');
+                        }
+                    });
+                }
+            });
+        </script>
     </div>
 </div>
