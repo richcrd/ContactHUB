@@ -15,7 +15,7 @@ namespace ContactHUB.Controllers
             _context = context;
         }
 
-        public IActionResult Index(string search, int? departamentoId, int? etiquetaId)
+        public IActionResult Index(string search, int? departamentoId, int? etiquetaId, string orden = "recientes")
         {
             var usuarioNombre = User.Identity?.Name;
             if (string.IsNullOrEmpty(usuarioNombre))
@@ -45,6 +45,16 @@ namespace ContactHUB.Controllers
                 contactosQuery = contactosQuery.Where(c => c.ContactoEtiquetas.Any(ce => ce.IdEtiqueta == etiquetaId));
             }
 
+            // Ordenar por agregados recientes o antiguos
+            if (orden == "recientes")
+            {
+                contactosQuery = contactosQuery.OrderByDescending(c => c.IdContacto); // Suponiendo que IdContacto es autoincremental
+            }
+            else if (orden == "antiguos")
+            {
+                contactosQuery = contactosQuery.OrderBy(c => c.IdContacto);
+            }
+
             var contactos = contactosQuery.ToList();
 
             // Estadísticas
@@ -58,6 +68,7 @@ namespace ContactHUB.Controllers
             ViewBag.Search = search;
             ViewBag.DepartamentoId = departamentoId;
             ViewBag.EtiquetaId = etiquetaId;
+            ViewBag.Orden = orden;
 
             return View(contactos);
         }

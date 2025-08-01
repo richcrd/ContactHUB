@@ -90,6 +90,50 @@ $(function(){
         </div>
     </div>
 </div>
+
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-3">
+        <label for="search" class="form-label mb-1">Buscar</label>
+        <input type="text" class="form-control" id="search" name="search" value="@search" placeholder="Nombre, correo, teléfono..." />
+    </div>
+    <div class="col-md-3">
+        <label for="departamentoId" class="form-label mb-1">Departamento</label>
+        <select class="form-select" id="departamentoId" name="departamentoId">
+            <option value="">Todos</option>
+            @if (departamentos != null)
+            {
+                foreach (var d in departamentos)
+                {
+                    <option value="@d.IdDepartamento" selected="@(departamentoId == d.IdDepartamento ? "selected" : null)">@d.Nombre</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="etiquetaId" class="form-label mb-1">Etiqueta</label>
+        <select class="form-select" id="etiquetaId" name="etiquetaId">
+            <option value="">Todas</option>
+            @if (etiquetas != null)
+            {
+                foreach (var e in etiquetas)
+                {
+                    <option value="@e.IdEtiqueta" selected="@(etiquetaId == e.IdEtiqueta ? "selected" : null)">@e.Nombre</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label for="orden" class="form-label mb-1">Ordenar por</label>
+        <select class="form-select" id="orden" name="orden">
+            <option value="recientes" selected="@(ViewBag.Orden == "recientes" ? "selected" : null)">Agregados Recientes</option>
+            <option value="antiguos" selected="@(ViewBag.Orden == "antiguos" ? "selected" : null)">Más Antiguos</option>
+        </select>
+    </div>
+    <div class="col-md-1 d-grid">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filtrar</button>
+    </div>
+</form>
+
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Contactos</h2>
     <button class="btn btn-primary" onclick="openContactoModal('@Url.Action("Create", "Contactos")', 'Agregar Contacto')">
