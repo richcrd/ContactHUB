@@ -3,6 +3,9 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+    <h1 class="display-4">Bienvenido, @User.FindFirst("Nombre")?.Value!</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <form asp-action="Logout" asp-controller="Auth" method="post" style="margin-top:20px;">
+        <button type="submit" class="btn btn-danger">Cerrar sesión</button>
+    </form>
 </div>

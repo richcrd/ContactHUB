@@ -1,0 +1,65 @@
+@model ContactHUB.Models.Contacto
+@{
+    var departamentos = ViewBag.Departamentos as List<ContactHUB.Models.Departamento>;
+    var etiquetas = ViewBag.Etiquetas as List<ContactHUB.Models.Etiqueta>;
+    var selectedEtiquetas = ViewBag.SelectedEtiquetas as int[] ?? new int[0];
+}
+@{
+    var formAction = Model.IdContacto > 0 ? Url.Action("Edit", "Contactos") : Url.Action("Create", "Contactos");
+}
+<form id="contactoForm" method="post" action="@formAction" onsubmit="event.preventDefault(); submitContactoForm(this.action);">
+    <div class="mb-3">
+        <label for="Nombre" class="form-label">Nombre</label>
+        <input asp-for="Nombre" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label for="Apellido" class="form-label">Apellido</label>
+        <input asp-for="Apellido" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label for="Telefono" class="form-label">Teléfono</label>
+        <input asp-for="Telefono" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label for="Correo" class="form-label">Correo</label>
+        <input asp-for="Correo" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label for="Direccion" class="form-label">Dirección</label>
+        <input asp-for="Direccion" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label for="Id_Departamento" class="form-label">Departamento</label>
+        <select asp-for="Id_Departamento" class="form-select">
+            <option value="">Seleccione</option>
+            @if (departamentos != null)
+            {
+                foreach (var d in departamentos)
+                {
+                    <option value="@d.IdDepartamento" selected="@(Model.Id_Departamento == d.IdDepartamento ? "selected" : null)">@d.Nombre</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Etiquetas</label>
+        <div class="d-flex flex-wrap gap-2">
+            @if (etiquetas != null)
+            {
+                foreach (var e in etiquetas)
+                {
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="etiquetas" id="etiqueta_@e.IdEtiqueta" value="@e.IdEtiqueta" @(selectedEtiquetas.Contains(e.IdEtiqueta) ? "checked" : null) />
+                <label class="form-check-label" for="etiqueta_@e.IdEtiqueta">@e.Nombre</label>
+            </div>
+                }
+            }
+        </div>
+    </div>
+    <input type="hidden" asp-for="IdContacto" />
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Guardar
+        </button>
+    </div>
+</form>

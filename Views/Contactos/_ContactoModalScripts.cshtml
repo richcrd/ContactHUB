@@ -1,0 +1,37 @@
+<script>
+function openContactoModal(url, title) {
+    $("#contactoModalLabel").text(title);
+    $("#contactoModalBody").html('<div class="text-center p-4"><div class="spinner-border"></div></div>');
+    $("#contactoModal").modal("show");
+    $.get(url, function(data) {
+        $("#contactoModalBody").html(data);
+    });
+}
+
+function submitContactoForm(actionUrl, onSuccess) {
+    var form = $("#contactoForm");
+    var formData = form.serialize();
+    $.post(actionUrl, formData, function(result) {
+        if (result.success) {
+            $("#contactoModal").modal("hide");
+            // Recargar la página para actualizar la tabla
+            location.reload();
+        } else {
+            $("#contactoModalBody").html(result.html);
+        }
+    });
+}
+</script>
+<!-- Modal HTML -->
+<div class="modal fade" id="contactoModal" tabindex="-1" aria-labelledby="contactoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="contactoModalLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="contactoModalBody">
+      </div>
+    </div>
+  </div>
+</div>
