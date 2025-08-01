@@ -12,6 +12,7 @@ public class ContactDbContext : DbContext
     public DbSet<Etiqueta> Etiquetas { get; set; }
     public DbSet<Contacto> Contactos { get; set; }
     public DbSet<ContactoEtiqueta> ContactoEtiquetas { get; set; }
+    public DbSet<AccionUsuario> AccionUsuarios { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

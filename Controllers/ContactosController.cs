@@ -90,6 +90,14 @@ namespace ContactHUB.Controllers
             if (usuario == null)
                 return Json(new { success = false, html = "No autorizado" });
 
+            // Limite de 50 contactos agregados por usuario por día
+            var hoy = DateTime.Today;
+            var agregadosHoy = _context.AccionUsuarios.Count(a => a.IdUsuario == usuario.IdUsuario && a.TipoAccion == "agregar_contacto" && a.Fecha >= hoy);
+            if (agregadosHoy >= 50)
+            {
+                return Json(new { success = false, html = "Has alcanzado el límite de contactos agregados por hoy." });
+            }
+
             contacto.Id_Usuario = usuario.IdUsuario;
             contacto.Id_Estado = 1; // Activo por defecto
             _context.Contactos.Add(contacto);
@@ -104,6 +112,16 @@ namespace ContactHUB.Controllers
                 });
             }
             _context.SaveChanges();
+
+            // Registrar acción en AccionUsuario
+            _context.AccionUsuarios.Add(new ContactHUB.Models.AccionUsuario
+            {
+                IdUsuario = usuario.IdUsuario,
+                TipoAccion = "agregar_contacto",
+                Fecha = DateTime.Now
+            });
+            _context.SaveChanges();
+
             return Json(new { success = true });
         }
 
@@ -123,9 +141,21 @@ namespace ContactHUB.Controllers
         [HttpPost]
         public IActionResult Edit([Bind("IdContacto,Nombre,Apellido,Telefono,Correo,Direccion,Id_Departamento")] ContactHUB.Models.Contacto contacto, int[] etiquetas)
         {
+            var usuarioNombre = User.Identity?.Name;
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuarioNombre);
+            if (usuario == null)
+                return Json(new { success = false, html = "No autorizado" });
+
+            // Limite de 100 ediciones por usuario por día
+            var hoy = DateTime.Today;
+            var edicionesHoy = _context.AccionUsuarios.Count(a => a.IdUsuario == usuario.IdUsuario && a.TipoAccion == "editar_contacto" && a.Fecha >= hoy);
+            if (edicionesHoy >= 100)
+            {
+                return Json(new { success = false, html = "Has alcanzado el límite de ediciones de contactos por hoy." });
+            }
+
             var contactoDb = _context.Contactos.Include(c => c.ContactoEtiquetas).FirstOrDefault(c => c.IdContacto == contacto.IdContacto);
             if (contactoDb == null) return Json(new { success = false, html = "No encontrado" });
-
 
             contactoDb.Nombre = contacto.Nombre;
             contactoDb.Apellido = contacto.Apellido;
@@ -145,6 +175,16 @@ namespace ContactHUB.Controllers
                 });
             }
             _context.SaveChanges();
+
+            // Registrar acción en AccionUsuario
+            _context.AccionUsuarios.Add(new ContactHUB.Models.AccionUsuario
+            {
+                IdUsuario = usuario.IdUsuario,
+                TipoAccion = "editar_contacto",
+                Fecha = DateTime.Now
+            });
+            _context.SaveChanges();
+
             return Json(new { success = true });
         }
 
@@ -158,11 +198,34 @@ namespace ContactHUB.Controllers
         [HttpPost, ActionName("Delete")]
         public IActionResult DeleteConfirmed(int id)
         {
+            var usuarioNombre = User.Identity?.Name;
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuarioNombre);
+            if (usuario == null) return Unauthorized();
+
+            // Limite de 5 eliminaciones por usuario por día
+            var hoy = DateTime.Today;
+            var eliminacionesHoy = _context.AccionUsuarios.Count(a => a.IdUsuario == usuario.IdUsuario && a.TipoAccion == "eliminar_contacto" && a.Fecha >= hoy);
+            if (eliminacionesHoy >= 5)
+            {
+                TempData["Error"] = "Has alcanzado el límite de eliminaciones de contactos por hoy.";
+                return RedirectToAction("Index");
+            }
+
             var contacto = _context.Contactos.FirstOrDefault(c => c.IdContacto == id);
             if (contacto == null) return NotFound();
             // Cambiar estado a Inactivo (Id_Estado = 2)
             contacto.Id_Estado = 2;
             _context.SaveChanges();
+
+            // Registrar acción en AccionUsuario
+            _context.AccionUsuarios.Add(new ContactHUB.Models.AccionUsuario
+            {
+                IdUsuario = usuario.IdUsuario,
+                TipoAccion = "eliminar_contacto",
+                Fecha = DateTime.Now
+            });
+            _context.SaveChanges();
+
             return RedirectToAction("Index");
         }
     }

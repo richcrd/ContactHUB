@@ -37,6 +37,25 @@ namespace ContactHUB.Controllers
                 ViewBag.Error = "La clave debe tener entre 8 y 30 caracteres.";
                 return View();
             }
+
+            // Limite de intentos fallidos de login por usuario/IP
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+            var hoy = DateTime.Today;
+            var ultimosFallos = _context.AccionUsuarios
+                .Where(a => a.TipoAccion == "login_fail" && a.Fecha >= hoy && (a.IP == ip || a.IdUsuario == null))
+                .OrderByDescending(a => a.Fecha)
+                .Take(5)
+                .ToList();
+            if (ultimosFallos.Count == 5)
+            {
+                var minutosRestantes = 3 - (DateTime.Now - ultimosFallos.First().Fecha).TotalMinutes;
+                if (minutosRestantes > 0)
+                {
+                    ViewBag.Error = $"Has superado el límite de intentos fallidos. Espera {Math.Ceiling(minutosRestantes)} minutos para volver a intentar.";
+                    return View();
+                }
+            }
+
             try
             {
                 var user = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuario && u.Estado.Nombre == "Activo");
@@ -57,6 +76,15 @@ namespace ContactHUB.Controllers
                         return RedirectToAction("Index", "Home");
                     }
                 }
+                // Registrar intento fallido
+                _context.AccionUsuarios.Add(new AccionUsuario
+                {
+                    IdUsuario = user?.IdUsuario,
+                    IP = ip,
+                    TipoAccion = "login_fail",
+                    Fecha = DateTime.Now
+                });
+                _context.SaveChanges();
                 ViewBag.Error = "Usuario o clave incorrectos";
             }
             catch (Exception ex)
@@ -76,6 +104,15 @@ namespace ContactHUB.Controllers
         [HttpPost]
         public IActionResult Register(string usuario, string nombre, string clave)
         {
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+            var hoy = DateTime.Today;
+            var registrosHoy = _context.AccionUsuarios.Count(a => a.IP == ip && a.TipoAccion == "registro" && a.Fecha >= hoy);
+            if (registrosHoy >= 3)
+            {
+                ViewBag.Error = "Has alcanzado el límite de registros por IP para hoy.";
+                return View();
+            }
+
             if (string.IsNullOrWhiteSpace(usuario) || usuario.Length < 4 || usuario.Length > 10 || !System.Text.RegularExpressions.Regex.IsMatch(usuario, "^[a-zA-Z0-9_]+$"))
             {
                 ViewBag.Error = "El usuario debe tener entre 4 y 10 caracteres y solo puede contener letras, números y guion bajo.";
@@ -110,6 +147,16 @@ namespace ContactHUB.Controllers
                 user.Clave = hasher.HashPassword(user, clave);
                 _context.Usuarios.Add(user);
                 _context.SaveChanges();
+
+                // Registrar acción en AccionUsuario
+                _context.AccionUsuarios.Add(new AccionUsuario
+                {
+                    IP = ip,
+                    TipoAccion = "registro",
+                    Fecha = DateTime.Now
+                });
+                _context.SaveChanges();
+
                 ViewBag.Message = "Usuario registrado exitosamente.";
                 return RedirectToAction("Login");
             }
