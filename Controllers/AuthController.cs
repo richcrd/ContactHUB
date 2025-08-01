@@ -29,13 +29,13 @@ namespace ContactHUB.Controllers
             // Validaciones del lado del servidor
             if (string.IsNullOrWhiteSpace(usuario) || usuario.Length < 4 || usuario.Length > 10 || !System.Text.RegularExpressions.Regex.IsMatch(usuario, "^[a-zA-Z0-9_]+$"))
             {
-                ViewBag.Error = "El usuario debe tener entre 4 y 10 caracteres y solo puede contener letras, números y guion bajo.";
-                return View();
+                TempData["Error"] = "El usuario debe tener entre 4 y 10 caracteres y solo puede contener letras, números y guion bajo.";
+                return RedirectToAction("Login");
             }
             if (string.IsNullOrWhiteSpace(clave) || clave.Length < 8 || clave.Length > 30)
             {
-                ViewBag.Error = "La clave debe tener entre 8 y 30 caracteres.";
-                return View();
+                TempData["Error"] = "La clave debe tener entre 8 y 30 caracteres.";
+                return RedirectToAction("Login");
             }
 
             // Limite de intentos fallidos de login por usuario/IP
@@ -51,8 +51,8 @@ namespace ContactHUB.Controllers
                 var minutosRestantes = 3 - (DateTime.Now - ultimosFallos.First().Fecha).TotalMinutes;
                 if (minutosRestantes > 0)
                 {
-                    ViewBag.Error = $"Has superado el límite de intentos fallidos. Espera {Math.Ceiling(minutosRestantes)} minutos para volver a intentar.";
-                    return View();
+                    TempData["Error"] = $"Has superado el límite de intentos fallidos. Espera {Math.Ceiling(minutosRestantes)} minutos para volver a intentar.";
+                    return RedirectToAction("Login");
                 }
             }
 
@@ -73,6 +73,7 @@ namespace ContactHUB.Controllers
                         var identity = new System.Security.Claims.ClaimsIdentity(claims, "Cookies");
                         var principal = new System.Security.Claims.ClaimsPrincipal(identity);
                         await HttpContext.SignInAsync("Cookies", principal);
+                        TempData["Success"] = "¡Bienvenido, " + user.Nombre + "! Has iniciado sesión correctamente.";
                         return RedirectToAction("Index", "Home");
                     }
                 }
@@ -85,12 +86,12 @@ namespace ContactHUB.Controllers
                     Fecha = DateTime.Now
                 });
                 _context.SaveChanges();
-                ViewBag.Error = "Usuario o clave incorrectos";
+                TempData["Error"] = "Usuario o clave incorrectos";
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error en Login: {Message}", ex.Message);
-                ViewBag.Error = "No se pudo conectar con la base de datos. Intente más tarde.";
+                TempData["Error"] = "No se pudo conectar con la base de datos. Intente más tarde.";
             }
             return View();
         }
@@ -109,24 +110,24 @@ namespace ContactHUB.Controllers
             var registrosHoy = _context.AccionUsuarios.Count(a => a.IP == ip && a.TipoAccion == "registro" && a.Fecha >= hoy);
             if (registrosHoy >= 3)
             {
-                ViewBag.Error = "Has alcanzado el límite de registros por IP para hoy.";
-                return View();
+                TempData["Error"] = "Has alcanzado el límite de registros por IP para hoy.";
+                return RedirectToAction("Register");
             }
 
             if (string.IsNullOrWhiteSpace(usuario) || usuario.Length < 4 || usuario.Length > 10 || !System.Text.RegularExpressions.Regex.IsMatch(usuario, "^[a-zA-Z0-9_]+$"))
             {
-                ViewBag.Error = "El usuario debe tener entre 4 y 10 caracteres y solo puede contener letras, números y guion bajo.";
-                return View();
+                TempData["Error"] = "El usuario debe tener entre 4 y 10 caracteres y solo puede contener letras, números y guion bajo.";
+                return RedirectToAction("Register");
             }
             if (string.IsNullOrWhiteSpace(nombre) || nombre.Length < 4 || nombre.Length > 50 || !System.Text.RegularExpressions.Regex.IsMatch(nombre, "^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
             {
-                ViewBag.Error = "El nombre debe tener entre 4 y 50 caracteres y solo puede contener letras y espacios.";
-                return View();
+                TempData["Error"] = "El nombre debe tener entre 4 y 50 caracteres y solo puede contener letras y espacios.";
+                return RedirectToAction("Register");
             }
             if (string.IsNullOrWhiteSpace(clave) || clave.Length < 8 || clave.Length > 30)
             {
-                ViewBag.Error = "La clave debe tener entre 8 y 30 caracteres.";
-                return View();
+                TempData["Error"] = "La clave debe tener entre 8 y 30 caracteres.";
+                return RedirectToAction("Register");
             }
             try
             {
@@ -134,8 +135,8 @@ namespace ContactHUB.Controllers
                 var existe = _context.Usuarios.Any(u => u.UsuarioNombre == usuario);
                 if (existe)
                 {
-                    ViewBag.Error = "El usuario ya existe.";
-                    return View();
+                TempData["Error"] = "El usuario ya existe.";
+                return RedirectToAction("Register");
                 }
                 var hasher = new PasswordHasher<Usuario>();
                 var user = new Usuario
@@ -157,14 +158,14 @@ namespace ContactHUB.Controllers
                 });
                 _context.SaveChanges();
 
-                ViewBag.Message = "Usuario registrado exitosamente.";
+                TempData["Success"] = "Usuario registrado exitosamente.";
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error en Register: {Message}", ex.Message);
-                ViewBag.Error = "No se pudo conectar con la base de datos. Intente más tarde.";
-                return View();
+                TempData["Error"] = "No se pudo conectar con la base de datos. Intente más tarde.";
+                return RedirectToAction("Register");
             }
         }
 
@@ -172,6 +173,7 @@ namespace ContactHUB.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync("Cookies");
+            TempData["Success"] = "Sesión cerrada correctamente.";
             return RedirectToAction("Login");
         }
     }

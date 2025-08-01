@@ -19,6 +19,13 @@
     background-color: #93DA97 !important;
     color: #fff !important;
 }
+.bg-custom-rojo {
+    background-color: #EA5B6F !important;
+    color: #fff !important;
+}
+.text-custom-rojo {
+    color: #EA5B6F !important;
+}
 .text-custom-verderosa {
     color: #93DA97 !important;
 }

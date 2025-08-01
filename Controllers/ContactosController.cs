@@ -61,7 +61,9 @@ namespace ContactHUB.Controllers
             var usuarioId = usuario.IdUsuario;
             ViewBag.TotalContactos = _context.Contactos.Count(c => c.Id_Usuario == usuarioId);
             ViewBag.TotalActivos = _context.Contactos.Count(c => c.Id_Usuario == usuarioId && c.Id_Estado == 1);
-            ViewBag.TotalInactivos = _context.Contactos.Count(c => c.Id_Usuario == usuarioId && c.Id_Estado == 2);
+            var hoy = DateTime.Today;
+            ViewBag.AgregadosHoy = _context.AccionUsuarios.Count(a => a.IdUsuario == usuarioId && a.TipoAccion == "agregar_contacto" && a.Fecha >= hoy);
+            ViewBag.EliminadosHoy = _context.AccionUsuarios.Count(a => a.IdUsuario == usuarioId && a.TipoAccion == "eliminar_contacto" && a.Fecha >= hoy);
 
             ViewBag.Departamentos = _context.Departamentos.ToList();
             ViewBag.Etiquetas = _context.Etiquetas.ToList();
@@ -88,13 +90,17 @@ namespace ContactHUB.Controllers
             var usuarioNombre = User.Identity?.Name;
             var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuarioNombre);
             if (usuario == null)
+            {
+                TempData["Error"] = "No autorizado.";
                 return Json(new { success = false, html = "No autorizado" });
+            }
 
             // Limite de 50 contactos agregados por usuario por día
             var hoy = DateTime.Today;
             var agregadosHoy = _context.AccionUsuarios.Count(a => a.IdUsuario == usuario.IdUsuario && a.TipoAccion == "agregar_contacto" && a.Fecha >= hoy);
             if (agregadosHoy >= 50)
             {
+                TempData["Error"] = "Has alcanzado el límite de contactos agregados por hoy.";
                 return Json(new { success = false, html = "Has alcanzado el límite de contactos agregados por hoy." });
             }
 
@@ -122,7 +128,8 @@ namespace ContactHUB.Controllers
             });
             _context.SaveChanges();
 
-            return Json(new { success = true });
+            TempData["Success"] = "Contacto creado exitosamente.";
+            return Json(new { success = true, message = "Contacto creado exitosamente." });
         }
 
         public IActionResult Edit(int id)
@@ -144,18 +151,26 @@ namespace ContactHUB.Controllers
             var usuarioNombre = User.Identity?.Name;
             var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuarioNombre);
             if (usuario == null)
+            {
+                TempData["Error"] = "No autorizado.";
                 return Json(new { success = false, html = "No autorizado" });
+            }
 
             // Limite de 100 ediciones por usuario por día
             var hoy = DateTime.Today;
             var edicionesHoy = _context.AccionUsuarios.Count(a => a.IdUsuario == usuario.IdUsuario && a.TipoAccion == "editar_contacto" && a.Fecha >= hoy);
             if (edicionesHoy >= 100)
             {
+                TempData["Error"] = "Has alcanzado el límite de ediciones de contactos por hoy.";
                 return Json(new { success = false, html = "Has alcanzado el límite de ediciones de contactos por hoy." });
             }
 
             var contactoDb = _context.Contactos.Include(c => c.ContactoEtiquetas).FirstOrDefault(c => c.IdContacto == contacto.IdContacto);
-            if (contactoDb == null) return Json(new { success = false, html = "No encontrado" });
+            if (contactoDb == null)
+            {
+                TempData["Error"] = "Contacto no encontrado.";
+                return Json(new { success = false, html = "No encontrado" });
+            }
 
             contactoDb.Nombre = contacto.Nombre;
             contactoDb.Apellido = contacto.Apellido;
@@ -185,7 +200,8 @@ namespace ContactHUB.Controllers
             });
             _context.SaveChanges();
 
-            return Json(new { success = true });
+            TempData["Success"] = "Contacto editado exitosamente.";
+            return Json(new { success = true, message = "Contacto editado exitosamente." });
         }
 
         public IActionResult Delete(int id)
@@ -200,7 +216,11 @@ namespace ContactHUB.Controllers
         {
             var usuarioNombre = User.Identity?.Name;
             var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuarioNombre);
-            if (usuario == null) return Unauthorized();
+            if (usuario == null)
+            {
+                TempData["Error"] = "No autorizado.";
+                return Unauthorized();
+            }
 
             // Limite de 5 eliminaciones por usuario por día
             var hoy = DateTime.Today;
@@ -212,7 +232,11 @@ namespace ContactHUB.Controllers
             }
 
             var contacto = _context.Contactos.FirstOrDefault(c => c.IdContacto == id);
-            if (contacto == null) return NotFound();
+            if (contacto == null)
+            {
+                TempData["Error"] = "Contacto no encontrado.";
+                return NotFound();
+            }
             // Cambiar estado a Inactivo (Id_Estado = 2)
             contacto.Id_Estado = 2;
             _context.SaveChanges();
@@ -226,6 +250,7 @@ namespace ContactHUB.Controllers
             });
             _context.SaveChanges();
 
+            TempData["Success"] = "Contacto eliminado exitosamente.";
             return RedirectToAction("Index");
         }
     }
