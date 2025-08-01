@@ -2,10 +2,105 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Bienvenido, @User.FindFirst("Nombre")?.Value!</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    <form asp-action="Logout" asp-controller="Auth" method="post" style="margin-top:20px;">
-        <button type="submit" class="btn btn-danger">Cerrar sesión</button>
-    </form>
-</div>
+
+<!-- Hero Section -->
+<section class="py-5 bg-custom-azul text-white text-center rounded-4 mb-4 shadow">
+    <div class="container">
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            <h1 class="display-3 fw-bold mb-3">Bienvenido, @User.FindFirst("Nombre")?.Value!</h1>
+            <p class="lead mb-4">Gestiona tus contactos de forma segura, rápida y moderna. ¡Todo en un solo lugar!</p>
+            <a href="/Contactos" class="btn btn-warning btn-lg me-2"><i class="bi bi-person-lines-fill"></i> Ver Contactos</a>
+            <a href="/Contactos/Create" class="btn btn-light btn-lg"><i class="bi bi-person-plus"></i> Agregar Contacto</a>
+        }
+        else
+        {
+            <h1 class="display-3 fw-bold mb-3">Bienvenido a ContactHUB</h1>
+            <p class="lead mb-4">Regístrate o inicia sesión para gestionar tus contactos de forma segura y moderna.</p>
+            <a href="/Auth/Login" class="btn btn-primary btn-lg me-2"><i class="bi bi-box-arrow-in-right"></i> Iniciar sesión</a>
+            <a href="/Auth/Register" class="btn btn-outline-light btn-lg"><i class="bi bi-person-plus"></i> Registrarse</a>
+        }
+    </div>
+</section>
+
+<!-- Funcionalidades Destacadas -->
+<section class="container mb-5">
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-4">
+            <div class="card border-0 shadow rounded-4 h-100 text-center">
+                <div class="card-body py-4">
+                    <i class="bi bi-shield-lock display-4 text-custom-azul mb-3"></i>
+                    <h5 class="fw-bold mb-2">Seguridad avanzada</h5>
+                    <p>Protege tus datos con autenticación, límites y cifrado de contraseñas.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow rounded-4 h-100 text-center">
+                <div class="card-body py-4">
+                    <i class="bi bi-lightning-charge display-4 text-custom-naranja mb-3"></i>
+                    <h5 class="fw-bold mb-2">Gestión rápida</h5>
+                    <p>Agrega, edita y filtra contactos fácilmente con una interfaz moderna y ágil.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow rounded-4 h-100 text-center">
+                <div class="card-body py-4">
+                    <i class="bi bi-bar-chart-line display-4 text-custom-verde mb-3"></i>
+                    <h5 class="fw-bold mb-2">Estadísticas y control</h5>
+                    <p>Visualiza estadísticas y mantén el control de tu actividad y contactos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonios de Usuarios -->
+<section class="container mb-5">
+    <h2 class="text-center fw-bold mb-4">Testimonios de usuarios</h2>
+    <div class="row justify-content-center g-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow rounded-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle me-3" width="48" height="48" alt="Usuario" />
+                        <div>
+                            <h6 class="mb-0">Carlos M.</h6>
+                            <small class="text-muted">Emprendedor</small>
+                        </div>
+                    </div>
+                    <p class="mb-0">“ContactHUB me ha permitido organizar mis clientes y contactos de forma profesional. ¡Recomendado!”</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow rounded-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" class="rounded-circle me-3" width="48" height="48" alt="Usuario" />
+                        <div>
+                            <h6 class="mb-0">María G.</h6>
+                            <small class="text-muted">Recursos Humanos</small>
+                        </div>
+                    </div>
+                    <p class="mb-0">“La interfaz es intuitiva y moderna. La seguridad me da mucha confianza para trabajar.”</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow rounded-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://randomuser.me/api/portraits/men/65.jpg" class="rounded-circle me-3" width="48" height="48" alt="Usuario" />
+                        <div>
+                            <h6 class="mb-0">Luis P.</h6>
+                            <small class="text-muted">Consultor</small>
+                        </div>
+                    </div>
+                    <p class="mb-0">“ContactHUB es la mejor herramienta para gestionar contactos y equipos. ¡Muy útil!”</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
