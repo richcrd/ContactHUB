@@ -1,0 +1,71 @@
+@model ContactHUB.Models.Usuario
+@{
+    ViewData["Title"] = "Mi Perfil";
+}
+<div class="container py-4" style="max-width: 500px;">
+    <h2 class="mb-4 text-center">Mi Perfil</h2>
+    <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080; min-width: 300px;">
+        <div id="toast-container"></div>
+    </div>
+    <script>
+    function showToast(message, type) {
+        var toastId = 'toast-' + Date.now();
+        var toastHtml = `<div id="${toastId}" class="toast align-items-center text-bg-` + type + ` border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3500">` +
+            `<div class="d-flex">` +
+            `<div class="toast-body">` + message + `</div>` +
+            `<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>` +
+            `</div></div>`;
+        var $toast = $(toastHtml);
+        $('#toast-container').append($toast);
+        var toast = new bootstrap.Toast($toast[0]);
+        toast.show();
+        $toast.on('hidden.bs.toast', function(){ $toast.remove(); });
+    }
+    $(function(){
+        @if (TempData["Success"] != null)
+        {
+            <text>showToast('@TempData["Success"]'.replace(/'/g, "\'"), 'success');</text>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <text>showToast('@TempData["Error"]'.replace(/'/g, "\'"), 'danger');</text>
+        }
+    });
+    </script>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">Datos de usuario</h5>
+            <form asp-action="CambiarNombre" method="post" autocomplete="off">
+                <div class="mb-3">
+                    <label class="form-label">Usuario</label>
+                    <input type="text" class="form-control" value="@Model.UsuarioNombre" readonly />
+                </div>
+                <div class="mb-3">
+                    <label for="nuevoNombre" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="nuevoNombre" name="nuevoNombre" value="@Model.Nombre" required minlength="4" maxlength="50" />
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Actualizar Nombre</button>
+            </form>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="mb-3">Cambiar Contraseña</h5>
+            <form asp-action="CambiarContrasena" method="post" autocomplete="off">
+                <div class="mb-3">
+                    <label for="actual" class="form-label">Contraseña Actual</label>
+                    <input type="password" class="form-control" id="actual" name="actual" required minlength="8" maxlength="30" />
+                </div>
+                <div class="mb-3">
+                    <label for="nueva" class="form-label">Nueva Contraseña</label>
+                    <input type="password" class="form-control" id="nueva" name="nueva" required minlength="8" maxlength="30" />
+                </div>
+                <div class="mb-3">
+                    <label for="repetir" class="form-label">Repetir Nueva Contraseña</label>
+                    <input type="password" class="form-control" id="repetir" name="repetir" required minlength="8" maxlength="30" />
+                </div>
+                <button type="submit" class="btn btn-success w-100">Actualizar Contraseña</button>
+            </form>
+        </div>
+    </div>
+</div>

@@ -68,6 +68,7 @@
                     {
                         <li class="nav-item d-flex align-items-center gap-2">
                             <span class="nav-link mb-0">Usuario: @(User.FindFirst("Nombre")?.Value ?? User.Identity.Name)</span>
+                            <a class="nav-link text-primary" asp-controller="Perfil" asp-action="Index" title="Editar perfil"><i class="bi bi-person-gear"></i> Perfil</a>
                             <form asp-action="Logout" asp-controller="Auth" method="post" class="d-inline mb-0">
                                 <button type="submit" class="btn btn-link nav-link p-0 align-baseline text-danger" style="vertical-align: middle;">Cerrar sesión</button>
                             </form>
@@ -101,7 +102,7 @@
                 <a href="/" class="text-white me-3">Inicio</a>
                 <a href="/Contactos" class="text-white me-3">Contactos</a>
                 <a href="/Home/Privacy" class="text-white me-3">Términos y condiciones</a>
-                <a href="mailto:soporte@contacthub.com" class="text-white">Soporte</a>
+                <a href="mailto:richardrrc1204@gmail.com" class="text-white">Soporte</a>
             </div>
             <div class="col-md-4 text-md-end">
                 <span class="fw-bold">Síguenos</span><br />
