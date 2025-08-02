@@ -3,7 +3,9 @@ using ContactHUB.Data;
 using ContactHUB.Models;
 using System.Linq;
 using Microsoft.AspNetCore.Authentication;
+
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace ContactHUB.Controllers
 {
@@ -58,7 +60,9 @@ namespace ContactHUB.Controllers
 
             try
             {
-                var user = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuario && u.Estado.Nombre == "Activo");
+                var user = _context.Usuarios
+                    .Include(u => u.Rol)
+                    .FirstOrDefault(u => u.UsuarioNombre == usuario && u.Estado.Nombre == "Activo");
                 if (user != null)
                 {
                     var hasher = new PasswordHasher<Usuario>();
@@ -68,7 +72,8 @@ namespace ContactHUB.Controllers
                         var claims = new List<System.Security.Claims.Claim>
                         {
                             new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.UsuarioNombre),
-                            new System.Security.Claims.Claim("Nombre", user.Nombre)
+                            new System.Security.Claims.Claim("Nombre", user.Nombre),
+                            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, user.Rol.Nombre)
                         };
                         var identity = new System.Security.Claims.ClaimsIdentity(claims, "Cookies");
                         var principal = new System.Security.Claims.ClaimsPrincipal(identity);
@@ -143,7 +148,8 @@ namespace ContactHUB.Controllers
                 {
                     UsuarioNombre = usuario,
                     Nombre = nombre,
-                    Id_Estado = 1 // Activo
+                    Id_Estado = 1, // Activo
+                    IdRol = 2 // Usuario normal por defecto
                 };
                 user.Clave = hasher.HashPassword(user, clave);
                 _context.Usuarios.Add(user);

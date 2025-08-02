@@ -41,6 +41,13 @@ app.UseAuthorization();
 app.MapStaticAssets();
 
 
+
+// Area route mapping for Admin controllers
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+// Default route
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")

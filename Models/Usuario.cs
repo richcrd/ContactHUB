@@ -14,4 +14,12 @@ public class Usuario
     public int Id_Estado { get; set; }
     public Estado Estado { get; set; } = null!;
     public ICollection<Contacto> Contactos { get; set; } = new List<Contacto>();
+
+    // Relación con Rol
+    public int IdRol { get; set; }
+    public Rol Rol { get; set; } = null!;
+
+    // Recuperación de contraseña
+    public string? RecuperacionToken { get; set; }
+    public DateTime? RecuperacionTokenExpira { get; set; }
 }

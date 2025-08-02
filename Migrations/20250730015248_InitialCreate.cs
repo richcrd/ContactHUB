@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// Archivo eliminado para limpiar migraciones previas
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 

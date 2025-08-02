@@ -2,8 +2,14 @@
 @{
     ViewData["Title"] = "Mi Perfil";
 }
-<div class="container py-4" style="max-width: 500px;">
-    <h2 class="mb-4 text-center">Mi Perfil</h2>
+<div class="container py-5" style="max-width: 480px;">
+    <div class="text-center mb-4">
+        <div class="rounded-circle bg-primary bg-gradient d-inline-flex align-items-center justify-content-center mb-2" style="width: 64px; height: 64px;">
+            <i class="bi bi-person-circle text-white fs-1"></i>
+        </div>
+        <h2 class="fw-bold mb-1">Mi Perfil</h2>
+        <p class="text-muted mb-0">Gestiona tu información personal y credenciales.</p>
+    </div>
     <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080; min-width: 300px;">
         <div id="toast-container"></div>
     </div>
@@ -32,9 +38,9 @@
         }
     });
     </script>
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h5 class="mb-3">Datos de usuario</h5>
+    <div class="card shadow-lg border-0 mb-4">
+        <div class="card-body p-4">
+            <h5 class="mb-3 text-primary"><i class="bi bi-person-badge"></i> Datos de usuario</h5>
             <form asp-action="CambiarNombre" method="post" autocomplete="off">
                 <div class="mb-3">
                     <label class="form-label">Usuario</label>
@@ -44,13 +50,13 @@
                     <label for="nuevoNombre" class="form-label">Nombre</label>
                     <input type="text" class="form-control" id="nuevoNombre" name="nuevoNombre" value="@Model.Nombre" required minlength="4" maxlength="50" />
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Actualizar Nombre</button>
+                <button type="submit" class="btn btn-gradient-primary w-100"><i class="bi bi-save"></i> Actualizar Nombre</button>
             </form>
         </div>
     </div>
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h5 class="mb-3">Cambiar Contraseña</h5>
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-4">
+            <h5 class="mb-3 text-success"><i class="bi bi-key"></i> Cambiar Contraseña</h5>
             <form asp-action="CambiarContrasena" method="post" autocomplete="off">
                 <div class="mb-3">
                     <label for="actual" class="form-label">Contraseña Actual</label>
@@ -64,8 +70,19 @@
                     <label for="repetir" class="form-label">Repetir Nueva Contraseña</label>
                     <input type="password" class="form-control" id="repetir" name="repetir" required minlength="8" maxlength="30" />
                 </div>
-                <button type="submit" class="btn btn-success w-100">Actualizar Contraseña</button>
+                <button type="submit" class="btn btn-gradient-primary w-100"><i class="bi bi-arrow-repeat"></i> Actualizar Contraseña</button>
             </form>
         </div>
     </div>
 </div>
+<style>
+    .btn-gradient-primary {
+        background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
+        border: none;
+        color: #fff;
+    }
+    .btn-gradient-primary:hover, .btn-gradient-primary:focus {
+        background: linear-gradient(90deg, #6610f2 0%, #0d6efd 100%);
+        color: #fff;
+    }
+</style>

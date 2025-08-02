@@ -169,6 +169,64 @@ namespace ContactHUB.Migrations
                     b.ToTable("Etiqueta");
                 });
 
+            modelBuilder.Entity("ContactHUB.Models.RecuperacionIntento", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Exitoso")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Ip")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Motivo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsuarioNombre")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RecuperacionIntentos");
+                });
+
+            modelBuilder.Entity("ContactHUB.Models.Rol", b =>
+                {
+                    b.Property<int>("IdRol")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdRol"));
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("IdRol");
+
+                    b.ToTable("Rol");
+
+                    b.HasData(
+                        new
+                        {
+                            IdRol = 1,
+                            Nombre = "Admin"
+                        },
+                        new
+                        {
+                            IdRol = 2,
+                            Nombre = "Usuario"
+                        });
+                });
+
             modelBuilder.Entity("ContactHUB.Models.Usuario", b =>
                 {
                     b.Property<int>("IdUsuario")
@@ -181,6 +239,9 @@ namespace ContactHUB.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("IdRol")
+                        .HasColumnType("int");
+
                     b.Property<int>("Id_Estado")
                         .HasColumnType("int");
 
@@ -188,12 +249,20 @@ namespace ContactHUB.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RecuperacionToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RecuperacionTokenExpira")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("UsuarioNombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Usuario");
 
                     b.HasKey("IdUsuario");
+
+                    b.HasIndex("IdRol");
 
                     b.HasIndex("Id_Estado");
 
@@ -266,6 +335,12 @@ namespace ContactHUB.Migrations
 
             modelBuilder.Entity("ContactHUB.Models.Usuario", b =>
                 {
+                    b.HasOne("ContactHUB.Models.Rol", "Rol")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("IdRol")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("ContactHUB.Models.Estado", "Estado")
                         .WithMany("Usuarios")
                         .HasForeignKey("Id_Estado")
@@ -273,6 +348,8 @@ namespace ContactHUB.Migrations
                         .IsRequired();
 
                     b.Navigation("Estado");
+
+                    b.Navigation("Rol");
                 });
 
             modelBuilder.Entity("ContactHUB.Models.Contacto", b =>
@@ -299,6 +376,11 @@ namespace ContactHUB.Migrations
             modelBuilder.Entity("ContactHUB.Models.Etiqueta", b =>
                 {
                     b.Navigation("ContactoEtiquetas");
+                });
+
+            modelBuilder.Entity("ContactHUB.Models.Rol", b =>
+                {
+                    b.Navigation("Usuarios");
                 });
 
             modelBuilder.Entity("ContactHUB.Models.Usuario", b =>

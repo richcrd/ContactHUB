@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "Recuperar contraseña";
+}
+<div class="container mt-5">
+    <h2>Recuperar contraseña</h2>
+    <form asp-action="Solicitar" method="post" class="mt-4">
+        <div class="mb-3">
+            <label for="usuarioOEmail" class="form-label">Usuario o Email</label>
+            <input type="text" class="form-control" id="usuarioOEmail" name="usuarioOEmail" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar enlace</button>
+    </form>
+    @if (TempData["Info"] != null)
+    {
+        <div class="alert alert-info mt-3">@TempData["Info"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger mt-3">@TempData["Error"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success mt-3">@TempData["Success"]</div>
+    }
+</div>

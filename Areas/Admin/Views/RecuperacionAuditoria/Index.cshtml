@@ -1,0 +1,118 @@
+@model IEnumerable<ContactHUB.Models.RecuperacionIntento>
+@{
+    ViewData["Title"] = "Auditoría de Recuperación de Contraseña";
+    var intentos = Model.ToList();
+}
+<div class="container py-5">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold text-primary mb-0"><i class="bi bi-shield-lock"></i> Auditoría de Recuperación</h2>
+            <p class="text-muted mb-0">Historial de intentos de recuperación de contraseña.</p>
+        </div>
+        <div class="col-md-4 mt-3 mt-md-0">
+            <div class="input-group shadow-sm">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-primary"></i></span>
+                <input id="searchInput" type="text" class="form-control border-start-0" placeholder="Buscar usuario, IP o motivo..." />
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table id="auditoriaTable" class="table table-hover align-middle mb-0">
+                    <thead class="bg-gradient text-white" style="background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);">
+                        <tr>
+                            <th><i class="bi bi-calendar-event"></i> Fecha</th>
+                            <th><i class="bi bi-person"></i> Usuario</th>
+                            <th><i class="bi bi-globe"></i> IP</th>
+                            <th><i class="bi bi-check2-circle"></i> Éxito</th>
+                            <th><i class="bi bi-chat-left-text"></i> Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var intento in intentos)
+                    {
+                        <tr>
+                            <td>@intento.Fecha.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td>@intento.UsuarioNombre</td>
+                            <td>@intento.Ip</td>
+                            <td>
+                                @if (intento.Exitoso)
+                                {
+                                    <span class="badge rounded-pill bg-success px-3 py-2"><i class="bi bi-check-circle"></i> Sí</span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill bg-danger px-3 py-2"><i class="bi bi-x-circle"></i> No</span>
+                                }
+                            </td>
+                            <td>@intento.Motivo</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <nav>
+        <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
+    </nav>
+</div>
+
+<style>
+    .table thead th {
+        vertical-align: middle;
+    }
+    .table-hover tbody tr:hover {
+        background-color: #f3f6fa;
+    }
+    .badge {
+        font-size: 1em;
+    }
+</style>
+<script>
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    let rows = Array.from(document.querySelectorAll('#auditoriaTable tbody tr'));
+
+    function renderTable() {
+        rows.forEach((row, i) => {
+            row.style.display = (i >= (currentPage - 1) * rowsPerPage && i < currentPage * rowsPerPage) ? '' : 'none';
+        });
+        renderPagination();
+    }
+
+    function renderPagination() {
+        const totalPages = Math.ceil(rows.length / rowsPerPage);
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = 'page-item' + (i === currentPage ? ' active' : '');
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.textContent = i;
+            a.onclick = function(e) {
+                e.preventDefault();
+                currentPage = i;
+                renderTable();
+            };
+            li.appendChild(a);
+            pagination.appendChild(li);
+        }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const value = this.value.toLowerCase();
+        rows = Array.from(document.querySelectorAll('#auditoriaTable tbody tr')).filter(row => {
+            return row.textContent.toLowerCase().includes(value);
+        });
+        currentPage = 1;
+        renderTable();
+    });
+
+    // Inicializar
+    rows = Array.from(document.querySelectorAll('#auditoriaTable tbody tr'));
+    renderTable();
+</script>

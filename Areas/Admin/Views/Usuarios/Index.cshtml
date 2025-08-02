@@ -1,0 +1,138 @@
+@model IEnumerable<ContactHUB.Models.Usuario>
+@{
+    ViewData["Title"] = "Gestión de Roles de Usuario";
+    var usuarios = Model.ToList();
+}
+<div class="container py-5">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold text-primary mb-0"><i class="bi bi-people"></i> Gestión de Roles de Usuario</h2>
+            <p class="text-muted mb-0">Administra los roles y estados de los usuarios de la plataforma.</p>
+        </div>
+        <div class="col-md-4 mt-3 mt-md-0">
+            <div class="input-group shadow-sm">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-primary"></i></span>
+                <input id="searchInput" type="text" class="form-control border-start-0" placeholder="Buscar usuario o nombre..." />
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table id="usuariosTable" class="table table-hover align-middle mb-0">
+                    <thead class="bg-gradient text-white" style="background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);">
+                        <tr>
+                            <th class="text-center">ID</th>
+                            <th><i class="bi bi-person"></i> Usuario</th>
+                            <th><i class="bi bi-person-badge"></i> Nombre</th>
+                            <th><i class="bi bi-shield-lock"></i> Rol</th>
+                            <th><i class="bi bi-gear"></i> Acción</th>
+                            <th><i class="bi bi-check-circle"></i> Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var usuario in usuarios)
+                    {
+                        <tr class="align-middle">
+                            <td class="text-center text-secondary">@usuario.IdUsuario</td>
+                            <td class="fw-semibold">@usuario.UsuarioNombre</td>
+                            <td>@usuario.Nombre</td>
+                            <td>
+                                <span class="badge rounded-pill bg-@(usuario.Rol?.Nombre == "Admin" ? "primary" : "secondary") px-3 py-2">
+                                    <i class="bi bi-@(usuario.Rol?.Nombre == "Admin" ? "shield-lock" : "person")"></i> @usuario.Rol?.Nombre
+                                </span>
+                            </td>
+                            <td>
+                                <form asp-action="CambiarRol" method="post" class="d-flex align-items-center gap-2 mb-0">
+                                    <input type="hidden" name="id" value="@usuario.IdUsuario" />
+                                    <select name="rol" class="form-select form-select-sm w-auto shadow-sm">
+                                        <option value="Usuario" selected="@(usuario.Rol?.Nombre == "Usuario" ? "selected" : null)">Usuario</option>
+                                        <option value="Admin" selected="@(usuario.Rol?.Nombre == "Admin" ? "selected" : null)">Admin</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-gradient-primary text-white shadow-sm">
+                                        <i class="bi bi-arrow-repeat"></i> Actualizar
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill bg-@(usuario.Estado?.Nombre == "Activo" ? "success" : "secondary") px-3 py-2">
+                                    <i class="bi bi-@(usuario.Estado?.Nombre == "Activo" ? "check-circle" : "slash-circle")"></i> @usuario.Estado?.Nombre
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <nav>
+        <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
+    </nav>
+</div>
+
+<style>
+    .btn-gradient-primary {
+        background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
+        border: none;
+    }
+    .btn-gradient-primary:hover, .btn-gradient-primary:focus {
+        background: linear-gradient(90deg, #6610f2 0%, #0d6efd 100%);
+        color: #fff;
+    }
+    .table thead th {
+        vertical-align: middle;
+    }
+    .table-hover tbody tr:hover {
+        background-color: #f3f6fa;
+    }
+    .badge {
+        font-size: 1em;
+    }
+</style>
+<script
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    let rows = Array.from(document.querySelectorAll('#usuariosTable tbody tr'));
+
+    function renderTable() {
+        rows.forEach((row, i) => {
+            row.style.display = (i >= (currentPage - 1) * rowsPerPage && i < currentPage * rowsPerPage) ? '' : 'none';
+        });
+        renderPagination();
+    }
+
+    function renderPagination() {
+        const totalPages = Math.ceil(rows.length / rowsPerPage);
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = 'page-item' + (i === currentPage ? ' active' : '');
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.textContent = i;
+            a.onclick = function(e) {
+                e.preventDefault();
+                currentPage = i;
+                renderTable();
+            };
+            li.appendChild(a);
+            pagination.appendChild(li);
+        }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const value = this.value.toLowerCase();
+        rows = Array.from(document.querySelectorAll('#usuariosTable tbody tr')).filter(row => {
+            return row.textContent.toLowerCase().includes(value);
+        });
+        currentPage = 1;
+        renderTable();
+    });
+
+    // Inicializar
+    rows = Array.from(document.querySelectorAll('#usuariosTable tbody tr'));
+    renderTable();
+</script>

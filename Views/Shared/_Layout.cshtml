@@ -58,10 +58,23 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Contactos" asp-action="Index">Contactos</a>
                         </li>
+                        @using Microsoft.EntityFrameworkCore
+                        var usuarioRol = Context.RequestServices.GetService(typeof(ContactHUB.Data.ContactDbContext)) is ContactHUB.Data.ContactDbContext db ?
+                            db.Usuarios.Include("Rol").FirstOrDefault(u => u.UsuarioNombre == User.Identity.Name)?.Rol?.Nombre : null;
+                        if (usuarioRol == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-danger fw-bold" asp-area="Admin" asp-controller="RecuperacionAuditoria" asp-action="Index">
+                                    <i class="bi bi-shield-lock"></i> Auditoría Recuperación
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-primary fw-bold" asp-area="Admin" asp-controller="Usuarios" asp-action="Index">
+                                    <i class="bi bi-people"></i> Gestión de Roles
+                                </a>
+                            </li>
+                        }
                     }
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
-                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     @if (User.Identity != null && User.Identity.IsAuthenticated)
