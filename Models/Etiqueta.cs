@@ -9,7 +9,7 @@ public class Etiqueta
     [Key]
     public int IdEtiqueta { get; set; }
     public string Nombre { get; set; } = null!;
-    public int Id_Estado { get; set; }
-    public Estado Estado { get; set; } = null!;
+    public int? Id_Estado { get; set; }
+    public Estado? Estado { get; set; } = null!;
     public ICollection<ContactoEtiqueta> ContactoEtiquetas { get; set; } = new List<ContactoEtiqueta>();
 }

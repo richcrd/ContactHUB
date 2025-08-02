@@ -1,0 +1,20 @@
+@model ContactHUB.Models.Etiqueta
+@{
+    Layout = null;
+}
+<form asp-action="@(Model?.IdEtiqueta > 0 ? "Editar" : "Crear")" method="post" autocomplete="off" id="etiquetaForm">
+    @Html.AntiForgeryToken()
+    @if (Model?.IdEtiqueta > 0)
+    {
+        <input type="hidden" asp-for="IdEtiqueta" />
+    }
+    <input type="hidden" asp-for="Id_Estado" />
+    <div class="mb-3">
+        <label for="Nombre" class="form-label">Nombre</label>
+        <input asp-for="Nombre" class="form-control" maxlength="30" required />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-@(Model?.IdEtiqueta > 0 ? "primary" : "success") w-100" id="btnSubmitEtiqueta">
+        <i class="bi bi-@(Model?.IdEtiqueta > 0 ? "save" : "plus-circle")"></i> @(Model?.IdEtiqueta > 0 ? "Guardar" : "Crear")
+    </button>
+</form>
