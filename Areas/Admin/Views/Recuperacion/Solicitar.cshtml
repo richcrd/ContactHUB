@@ -1,0 +1,34 @@
+@{
+    ViewData["Title"] = "Recuperar contraseña";
+}
+<h2 class="mb-4">Recuperar contraseña</h2>
+<form asp-action="Solicitar" method="post" class="card card-body shadow-sm p-4 mx-auto" style="max-width: 400px;">
+    <div class="mb-3">
+        <label for="correo" class="form-label">Correo electrónico</label>
+        <input type="email" class="form-control" id="correo" name="correo" required autofocus />
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Enviar código</button>
+</form>
+<div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080; min-width: 300px;">
+    <div id="toast-container"></div>
+</div>
+<script>
+function showToast(message, type) {
+    var toastId = 'toast-' + Date.now();
+    var toastHtml = `<div id="${toastId}" class="toast align-items-center text-bg-` + type + ` border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3500">` +
+        `<div class="d-flex">` +
+        `<div class="toast-body">` + message + `</div>` +
+        `<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>` +
+        `</div></div>`;
+    var $toast = $(toastHtml);
+    $('#toast-container').append($toast);
+    var toast = new bootstrap.Toast($toast[0]);
+    toast.show();
+    $toast.on('hidden.bs.toast', function(){ $toast.remove(); });
+}
+$(function(){
+    if ('@TempData["Error"]' && '@TempData["Error"]' !== '') showToast('@TempData["Error"]', 'danger');
+    if ('@TempData["Success"]' && '@TempData["Success"]' !== '') showToast('@TempData["Success"]', 'success');
+    if ('@TempData["Info"]' && '@TempData["Info"]' !== '') showToast('@TempData["Info"]', 'info');
+});
+</script>

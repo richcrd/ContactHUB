@@ -15,6 +15,7 @@ public class ContactDbContext : DbContext
     public DbSet<AccionUsuario> AccionUsuarios { get; set; }
     public DbSet<RecuperacionIntento> RecuperacionIntentos { get; set; }
     public DbSet<Rol> Roles { get; set; }
+    public DbSet<RecuperacionOtp> RecuperacionOtps { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

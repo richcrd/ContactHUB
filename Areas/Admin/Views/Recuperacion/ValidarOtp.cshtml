@@ -1,0 +1,34 @@
+@{
+    ViewData["Title"] = "Validar código";
+    var correo = ViewBag.Correo as string ?? "";
+}
+<h2 class="mb-4">Validar código</h2>
+<form asp-action="ValidarOtp" method="post" class="card card-body shadow-sm p-4 mx-auto" style="max-width: 400px;">
+    <input type="hidden" name="correo" value="@correo" />
+    <div class="mb-3">
+        <label for="codigo" class="form-label">Código recibido</label>
+        <input type="text" class="form-control" id="codigo" name="codigo" maxlength="6" required autofocus />
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Validar</button>
+</form>
+<div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080; min-width: 300px;">
+    <div id="toast-container"></div>
+</div>
+<script>
+function showToast(message, type) {
+    var toastId = 'toast-' + Date.now();
+    var toastHtml = `<div id="${toastId}" class="toast align-items-center text-bg-` + type + ` border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3500">` +
+        `<div class="d-flex">` +
+        `<div class="toast-body">` + message + `</div>` +
+        `<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>` +
+        `</div></div>`;
+    var $toast = $(toastHtml);
+    $('#toast-container').append($toast);
+    var toast = new bootstrap.Toast($toast[0]);
+    toast.show();
+    $toast.on('hidden.bs.toast', function(){ $toast.remove(); });
+}
+$(function(){
+    if ('@TempData["Error"]' && '@TempData["Error"]' !== '') showToast('@TempData["Error"]', 'danger');
+});
+</script>
