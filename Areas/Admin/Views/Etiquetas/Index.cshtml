@@ -11,7 +11,7 @@
         <div id="toast-container"></div>
     </div>
     <table class="table table-hover align-middle shadow-sm bg-white rounded" id="tabla-etiquetas">
-        <thead class="table-light">
+        <thead class="table-light" id="thead-etiquetas">
             <tr>
                 <th>#</th>
                 <th>Nombre</th>
@@ -109,6 +109,19 @@ function submitEtiquetaForm(actionUrl) {
     });
 }
 
+// Soporte de modo oscuro para tabla de etiquetas
+function applyDarkTableEtiquetas() {
+    if (document.body.classList.contains('theme-dark')) {
+        $('#tabla-etiquetas').addClass('table-dark');
+        $('#thead-etiquetas').removeClass('table-light').addClass('table-dark');
+        $('#tabla-etiquetas tbody tr').css('background-color', ''); // reset
+    } else {
+        $('#tabla-etiquetas').removeClass('table-dark');
+        $('#thead-etiquetas').removeClass('table-dark').addClass('table-light');
+        $('#tabla-etiquetas tbody tr').css('background-color', ''); // reset
+    }
+}
+
 $(function(){
     // Mostrar toast si hay TempData
     @if (TempData["Success"] != null)
@@ -134,5 +147,10 @@ $(function(){
         var actionUrl = $(this).attr('action');
         submitEtiquetaForm(actionUrl);
     });
+    // Inicializar modo oscuro
+    applyDarkTableEtiquetas();
+    // Reaplicar al cambiar tema
+    const observerEtiquetas = new MutationObserver(applyDarkTableEtiquetas);
+    observerEtiquetas.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 });
 </script>

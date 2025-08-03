@@ -20,7 +20,7 @@
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table id="usuariosTable" class="table table-hover align-middle mb-0">
-                    <thead class="bg-gradient text-white" style="background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);">
+                    <thead class="bg-gradient text-white" style="background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);" id="thead-usuarios">
                         <tr>
                             <th class="text-center">ID</th>
                             <th><i class="bi bi-person"></i> Usuario</th>
@@ -90,7 +90,8 @@
         font-size: 1em;
     }
 </style>
-<script
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+<script>
     const rowsPerPage = 10;
     let currentPage = 1;
     let rows = Array.from(document.querySelectorAll('#usuariosTable tbody tr'));
@@ -135,4 +136,23 @@
     // Inicializar
     rows = Array.from(document.querySelectorAll('#usuariosTable tbody tr'));
     renderTable();
+
+    // Soporte modo oscuro tabla
+    function applyDarkTableUsuarios() {
+        if (document.body.classList.contains('theme-dark')) {
+            $('#usuariosTable').addClass('table-dark');
+            $('#thead-usuarios').removeClass('table-light').addClass('table-dark');
+            // Opcional: cambiar color de filas hover en modo oscuro
+            $('#usuariosTable tbody tr').css('background-color', ''); // reset
+        } else {
+            $('#usuariosTable').removeClass('table-dark');
+            $('#thead-usuarios').removeClass('table-dark').addClass('table-light');
+            $('#usuariosTable tbody tr').css('background-color', ''); // reset
+        }
+    }
+    $(function(){
+        applyDarkTableUsuarios();
+        const observerUsuarios = new MutationObserver(applyDarkTableUsuarios);
+        observerUsuarios.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    });
 </script>

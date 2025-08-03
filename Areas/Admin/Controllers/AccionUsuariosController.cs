@@ -23,7 +23,7 @@ namespace ContactHUB.Areas.Admin.Controllers
                     .ToList();
                 return View(acciones);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "No se pudo conectar a la base de datos. Por favor, intente más tarde.";
                 // Puedes loguear el error real si lo deseas: ex.Message
