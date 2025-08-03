@@ -253,5 +253,91 @@ namespace ContactHUB.Controllers
             TempData["Success"] = "Contacto eliminado exitosamente.";
             return RedirectToAction("Index");
         }
+        [HttpGet]
+        public IActionResult ExportExcel(string search, int? departamentoId, int? etiquetaId, string orden = "recientes")
+        {
+            var usuarioNombre = User.Identity?.Name;
+            if (string.IsNullOrEmpty(usuarioNombre))
+                return RedirectToAction("Login", "Auth");
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuarioNombre);
+            if (usuario == null)
+                return RedirectToAction("Login", "Auth");
+
+            var contactosQuery = _context.Contactos
+                .Include(c => c.Departamento)
+                .Include(c => c.Estado)
+                .Include(c => c.ContactoEtiquetas).ThenInclude(ce => ce.Etiqueta)
+                .Where(c => c.Id_Usuario == usuario.IdUsuario && c.Id_Estado == 1);
+            if (!string.IsNullOrWhiteSpace(search))
+                contactosQuery = contactosQuery.Where(c => c.Nombre.Contains(search) || c.Apellido.Contains(search) || c.Telefono.Contains(search));
+            if (departamentoId.HasValue)
+                contactosQuery = contactosQuery.Where(c => c.Id_Departamento == departamentoId);
+            if (etiquetaId.HasValue)
+                contactosQuery = contactosQuery.Where(c => c.ContactoEtiquetas.Any(ce => ce.IdEtiqueta == etiquetaId));
+            if (orden == "recientes")
+                contactosQuery = contactosQuery.OrderByDescending(c => c.IdContacto);
+            else if (orden == "antiguos")
+                contactosQuery = contactosQuery.OrderBy(c => c.IdContacto);
+            var contactos = contactosQuery.ToList();
+
+            // Generar archivo Excel simple (CSV)
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Nombre,Apellido,Telefono,Correo,Direccion,Departamento,Etiquetas");
+            foreach (var c in contactos)
+            {
+                var etiquetas = c.ContactoEtiquetas != null ? string.Join("|", c.ContactoEtiquetas.Select(e => e.Etiqueta?.Nombre)) : "";
+                csv.AppendLine($"{EscapeCsv(c.Nombre)},{EscapeCsv(c.Apellido)},{EscapeCsv(c.Telefono)},{EscapeCsv(c.Correo)},{EscapeCsv(c.Direccion)},{EscapeCsv(c.Departamento?.Nombre)},{EscapeCsv(etiquetas)}");
+            }
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            return File(bytes, "text/csv", "contactos.csv");
+        }
+
+        [HttpGet]
+        public IActionResult ExportJson(string search, int? departamentoId, int? etiquetaId, string orden = "recientes")
+        {
+            var usuarioNombre = User.Identity?.Name;
+            if (string.IsNullOrEmpty(usuarioNombre))
+                return RedirectToAction("Login", "Auth");
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuarioNombre);
+            if (usuario == null)
+                return RedirectToAction("Login", "Auth");
+
+            var contactosQuery = _context.Contactos
+                .Include(c => c.Departamento)
+                .Include(c => c.Estado)
+                .Include(c => c.ContactoEtiquetas).ThenInclude(ce => ce.Etiqueta)
+                .Where(c => c.Id_Usuario == usuario.IdUsuario && c.Id_Estado == 1);
+            if (!string.IsNullOrWhiteSpace(search))
+                contactosQuery = contactosQuery.Where(c => c.Nombre.Contains(search) || c.Apellido.Contains(search) || c.Telefono.Contains(search));
+            if (departamentoId.HasValue)
+                contactosQuery = contactosQuery.Where(c => c.Id_Departamento == departamentoId);
+            if (etiquetaId.HasValue)
+                contactosQuery = contactosQuery.Where(c => c.ContactoEtiquetas.Any(ce => ce.IdEtiqueta == etiquetaId));
+            if (orden == "recientes")
+                contactosQuery = contactosQuery.OrderByDescending(c => c.IdContacto);
+            else if (orden == "antiguos")
+                contactosQuery = contactosQuery.OrderBy(c => c.IdContacto);
+            var contactos = contactosQuery.ToList();
+
+            var json = System.Text.Json.JsonSerializer.Serialize(contactos.Select(c => new {
+                c.Nombre,
+                c.Apellido,
+                c.Telefono,
+                c.Correo,
+                c.Direccion,
+                Departamento = c.Departamento?.Nombre,
+                Etiquetas = c.ContactoEtiquetas != null ? c.ContactoEtiquetas.Select(e => e.Etiqueta?.Nombre ?? string.Empty).ToList() : new List<string>()
+            }), new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+            var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+            return File(bytes, "application/json", "contactos.json");
+        }
+
+        private string EscapeCsv(string? value)
+        {
+            if (string.IsNullOrEmpty(value)) return "";
+            if (value.Contains(',') || value.Contains('"') || value.Contains('\n'))
+                return $"\"{value.Replace("\"", "\"\"")}";
+            return value;
+        }
     }
 }

@@ -1,0 +1,30 @@
+@model IEnumerable<ContactHUB.Models.AccionUsuario>
+@{
+    ViewData["Title"] = "Acciones de Usuarios";
+}
+<div class="container py-4">
+    <h2 class="mb-4">Acciones de Usuarios</h2>
+    <table class="table table-hover table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>IP</th>
+                <th>Tipo de Acción</th>
+                <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td>@a.IdAccion</td>
+                <td>@a.IdUsuario</td>
+                <td>@a.IP</td>
+                <td>@a.TipoAccion</td>
+                <td>@a.Fecha.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

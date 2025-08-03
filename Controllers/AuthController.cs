@@ -28,38 +28,38 @@ namespace ContactHUB.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string usuario, string clave)
         {
-            // Validaciones del lado del servidor
-            if (string.IsNullOrWhiteSpace(usuario) || usuario.Length < 4 || usuario.Length > 10 || !System.Text.RegularExpressions.Regex.IsMatch(usuario, "^[a-zA-Z0-9_]+$"))
-            {
-                TempData["Error"] = "El usuario debe tener entre 4 y 10 caracteres y solo puede contener letras, números y guion bajo.";
-                return RedirectToAction("Login");
-            }
-            if (string.IsNullOrWhiteSpace(clave) || clave.Length < 8 || clave.Length > 30)
-            {
-                TempData["Error"] = "La clave debe tener entre 8 y 30 caracteres.";
-                return RedirectToAction("Login");
-            }
-
-            // Limite de intentos fallidos de login por usuario/IP
-            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
-            var hoy = DateTime.Today;
-            var ultimosFallos = _context.AccionUsuarios
-                .Where(a => a.TipoAccion == "login_fail" && a.Fecha >= hoy && (a.IP == ip || a.IdUsuario == null))
-                .OrderByDescending(a => a.Fecha)
-                .Take(5)
-                .ToList();
-            if (ultimosFallos.Count == 5)
-            {
-                var minutosRestantes = 3 - (DateTime.Now - ultimosFallos.First().Fecha).TotalMinutes;
-                if (minutosRestantes > 0)
-                {
-                    TempData["Error"] = $"Has superado el límite de intentos fallidos. Espera {Math.Ceiling(minutosRestantes)} minutos para volver a intentar.";
-                    return RedirectToAction("Login");
-                }
-            }
-
             try
             {
+                // Validaciones del lado del servidor
+                if (string.IsNullOrWhiteSpace(usuario) || usuario.Length < 4 || usuario.Length > 10 || !System.Text.RegularExpressions.Regex.IsMatch(usuario, "^[a-zA-Z0-9_]+$"))
+                {
+                    TempData["Error"] = "El usuario debe tener entre 4 y 10 caracteres y solo puede contener letras, números y guion bajo.";
+                    return RedirectToAction("Login");
+                }
+                if (string.IsNullOrWhiteSpace(clave) || clave.Length < 8 || clave.Length > 30)
+                {
+                    TempData["Error"] = "La clave debe tener entre 8 y 30 caracteres.";
+                    return RedirectToAction("Login");
+                }
+
+                // Limite de intentos fallidos de login por usuario/IP
+                var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+                var hoy = DateTime.Today;
+                var ultimosFallos = _context.AccionUsuarios
+                    .Where(a => a.TipoAccion == "login_fail" && a.Fecha >= hoy && (a.IP == ip || a.IdUsuario == null))
+                    .OrderByDescending(a => a.Fecha)
+                    .Take(5)
+                    .ToList();
+                if (ultimosFallos.Count == 5)
+                {
+                    var minutosRestantes = 3 - (DateTime.Now - ultimosFallos.First().Fecha).TotalMinutes;
+                    if (minutosRestantes > 0)
+                    {
+                        TempData["Error"] = $"Has superado el límite de intentos fallidos. Espera {Math.Ceiling(minutosRestantes)} minutos para volver a intentar.";
+                        return RedirectToAction("Login");
+                    }
+                }
+
                 var user = _context.Usuarios
                     .Include(u => u.Rol)
                     .FirstOrDefault(u => u.UsuarioNombre == usuario && u.Estado.Nombre == "Activo");
@@ -92,13 +92,14 @@ namespace ContactHUB.Controllers
                 });
                 _context.SaveChanges();
                 TempData["Error"] = "Usuario o clave incorrectos";
+                return View();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error en Login: {Message}", ex.Message);
                 TempData["Error"] = "No se pudo conectar con la base de datos. Intente más tarde.";
+                return RedirectToAction("Login");
             }
-            return View();
         }
 
         [HttpGet]

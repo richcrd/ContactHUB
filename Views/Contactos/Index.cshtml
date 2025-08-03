@@ -185,9 +185,17 @@ $(function(){
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Contactos</h2>
-    <button class="btn btn-primary" onclick="openContactoModal('@Url.Action("Create", "Contactos")', 'Agregar Contacto')">
-        <i class="bi bi-person-plus"></i> Agregar Contacto
-    </button>
+    <div class="d-flex gap-2">
+        <a class="btn btn-success" href="@Url.Action("ExportExcel", new { search = ViewBag.Search, departamentoId = ViewBag.DepartamentoId, etiquetaId = ViewBag.EtiquetaId, orden = ViewBag.Orden })">
+            <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+        </a>
+        <a class="btn btn-info text-white" href="@Url.Action("ExportJson", new { search = ViewBag.Search, departamentoId = ViewBag.DepartamentoId, etiquetaId = ViewBag.EtiquetaId, orden = ViewBag.Orden })">
+            <i class="bi bi-file-earmark-code"></i> Exportar JSON
+        </a>
+        <button class="btn btn-primary" onclick="openContactoModal('@Url.Action("Create", "Contactos")', 'Agregar Contacto')">
+            <i class="bi bi-person-plus"></i> Agregar Contacto
+        </button>
+    </div>
 </div>
 
 @if (!Model.Any())

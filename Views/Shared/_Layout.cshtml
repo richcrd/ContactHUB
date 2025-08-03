@@ -63,15 +63,32 @@
                             db.Usuarios.Include("Rol").FirstOrDefault(u => u.UsuarioNombre == User.Identity.Name)?.Rol?.Nombre : null;
                         if (usuarioRol == "Admin")
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-danger fw-bold" asp-area="Admin" asp-controller="RecuperacionAuditoria" asp-action="Index">
-                                    <i class="bi bi-shield-lock"></i> Auditoría Recuperación
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle fw-bold text-danger" href="#" id="adminPanelDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-speedometer2"></i> Panel
                                 </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-primary fw-bold" asp-area="Admin" asp-controller="Usuarios" asp-action="Index">
-                                    <i class="bi bi-people"></i> Gestión de Roles
-                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminPanelDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="RecuperacionAuditoria" asp-action="Index">
+                                            <i class="bi bi-shield-lock"></i> Auditoría Recuperación
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="AccionUsuarios" asp-action="Index">
+                                            <i class="bi bi-clock-history"></i> Acciones de Usuario
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Etiquetas" asp-action="Index">
+                                            <i class="bi bi-tags"></i> Etiquetas
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Usuarios" asp-action="Index">
+                                            <i class="bi bi-people"></i> Gestión de Roles
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         }
                     }

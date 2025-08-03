@@ -52,6 +52,7 @@ namespace ContactHUB.Areas.Admin.Controllers
 
             // Enviar OTP por correo
             string mensaje = $"Tu código de recuperación es: {codigo}. Expira en 10 minutos.";
+            bool enviado = false;
             try
             {
                 var smtpHost = _config["Smtp:Host"] ?? string.Empty;
@@ -63,6 +64,7 @@ namespace ContactHUB.Areas.Admin.Controllers
                 smtp.Credentials = new NetworkCredential(smtpUser, smtpPass);
                 smtp.EnableSsl = true;
                 smtp.Send(smtpFrom, correo, "Código de recuperación", mensaje);
+                enviado = true;
             }
             catch
             {
@@ -70,6 +72,10 @@ namespace ContactHUB.Areas.Admin.Controllers
             }
 
             TempData["Correo"] = correo;
+            if (enviado)
+                TempData["Success"] = "Hemos enviado a tu correo el código OTP de recuperación.";
+            else
+                TempData["Error"] = "No se pudo enviar el correo, pero aquí tienes tu código OTP.";
             return RedirectToAction("ValidarOtp");
         }
 
@@ -98,6 +104,7 @@ namespace ContactHUB.Areas.Admin.Controllers
 
             TempData["Correo"] = correo;
             TempData["OtpValidado"] = true;
+            TempData["Success"] = "Código OTP validado correctamente. Ahora puedes restablecer tu contraseña.";
             return RedirectToAction("Restablecer");
         }
 
@@ -137,7 +144,6 @@ namespace ContactHUB.Areas.Admin.Controllers
                 TempData["OtpValidado"] = true;
                 return RedirectToAction("Restablecer");
             }
-
 
             // Buscar usuario por Email
             var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == correo);
