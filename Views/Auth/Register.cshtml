@@ -1,3 +1,4 @@
+@model ContactHUB.ViewModels.RegisterViewModel
 @{
     ViewData["Title"] = "Registro de Usuario";
 }
@@ -10,47 +11,21 @@
             <h2 class="fw-bold mb-1">Registro de Usuario</h2>
             <p class="text-muted mb-0">Crea tu cuenta para comenzar</p>
         </div>
-        <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080; min-width: 300px;">
-            <div id="toast-container"></div>
-        </div>
-        <script>
-        function showToast(message, type) {
-            var toastId = 'toast-' + Date.now();
-            var toastHtml = `<div id="${toastId}" class="toast align-items-center text-bg-` + type + ` border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3500">` +
-                `<div class="d-flex">` +
-                `<div class="toast-body">` + message + `</div>` +
-                `<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>` +
-                `</div></div>`;
-            var $toast = $(toastHtml);
-            $('#toast-container').append($toast);
-            var toast = new bootstrap.Toast($toast[0]);
-            toast.show();
-            $toast.on('hidden.bs.toast', function(){ $toast.remove(); });
-        }
-        $(function(){
-            @if (TempData["Success"] != null)
-            {
-                <text>showToast('@TempData["Success"]'.replace(/'/g, "\'"), 'success');</text>
-            }
-            @if (TempData["Error"] != null)
-            {
-                <text>showToast('@TempData["Error"]'.replace(/'/g, "\'"), 'danger');</text>
-            }
-        });
-        </script>
+        @await Html.PartialAsync("~/Views/Shared/_ToastMessages.cshtml")
         <form asp-action="Register" method="post">
+            <div asp-validation-summary="All" class="text-danger mb-2"></div>
             <div class="mb-3">
-                <label for="usuario" class="form-label">Usuario</label>
-                <input type="text" class="form-control" id="usuario" name="usuario" placeholder="Ingrese su usuario" required minlength="4" maxlength="20" pattern="^[a-zA-Z0-9_]+$" title="Solo letras, números y guion bajo. Mínimo 4 caracteres." />
+                <label asp-for="Usuario" class="form-label"></label>
+                <input asp-for="Usuario" class="form-control" placeholder="Ingrese su usuario" required minlength="4" maxlength="20" pattern="^[a-zA-Z0-9_]+$" title="Solo letras, números y guion bajo. Mínimo 4 caracteres." />
             </div>
             <div class="mb-3">
-                <label for="nombre" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese su nombre" required minlength="2" maxlength="50" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$" title="Solo letras y espacios. Mínimo 2 caracteres." />
+                <label asp-for="Nombre" class="form-label"></label>
+                <input asp-for="Nombre" class="form-control" placeholder="Ingrese su nombre" required minlength="2" maxlength="50" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$" title="Solo letras y espacios. Mínimo 2 caracteres." />
             </div>
             <div class="mb-3">
-                <label for="clave" class="form-label">Clave</label>
+                <label asp-for="Clave" class="form-label"></label>
                 <div class="input-group">
-                    <input type="password" class="form-control" id="clave" name="clave" placeholder="Ingrese su clave" required minlength="6" maxlength="30" title="La clave debe tener al menos 6 caracteres." />
+                    <input asp-for="Clave" type="password" class="form-control" placeholder="Ingrese su clave" required minlength="6" maxlength="30" title="La clave debe tener al menos 6 caracteres." />
                     <button type="button" class="btn btn-outline-secondary" id="toggleClave" tabindex="-1">
                         <span id="iconClave" class="bi bi-eye"></span>
                     </button>
@@ -62,26 +37,7 @@
         <p class="text-center mb-0">
             ¿Ya tienes cuenta? <a asp-action="Login">Inicia sesión aquí</a>
         </p>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const claveInput = document.getElementById('clave');
-                const toggleClave = document.getElementById('toggleClave');
-                const iconClave = document.getElementById('iconClave');
-                if (toggleClave) {
-                    toggleClave.addEventListener('click', function () {
-                        if (claveInput.type === 'password') {
-                            claveInput.type = 'text';
-                            iconClave.classList.remove('bi-eye');
-                            iconClave.classList.add('bi-eye-slash');
-                        } else {
-                            claveInput.type = 'password';
-                            iconClave.classList.remove('bi-eye-slash');
-                            iconClave.classList.add('bi-eye');
-                        }
-                    });
-                }
-            });
-        </script>
+        @await Html.PartialAsync("~/Views/Shared/_PasswordToggleScript.cshtml")
     </div>
 </div>
 <style>

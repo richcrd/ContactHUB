@@ -2,7 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using ContactHUB.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ContactHUB.Services.AuthService>();
 
 builder.Services.AddDbContext<ContactDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
