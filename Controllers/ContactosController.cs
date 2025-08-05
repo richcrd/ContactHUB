@@ -95,13 +95,19 @@ namespace ContactHUB.Controllers
                 return Json(new { success = false, html = "No autorizado" });
             }
 
-            // Limite de 50 contactos agregados por usuario por día
-            var hoy = DateTime.Today;
-            var agregadosHoy = _context.AccionUsuarios.Count(a => a.IdUsuario == usuario.IdUsuario && a.TipoAccion == "agregar_contacto" && a.Fecha >= hoy);
-            if (agregadosHoy >= 50)
+            // Limite de 20 contactos en total por usuario
+            var totalContactos = _context.Contactos.Count(c => c.Id_Usuario == usuario.IdUsuario && c.Id_Estado == 1);
+            if (totalContactos >= 20)
             {
-                TempData["Error"] = "Has alcanzado el límite de contactos agregados por hoy.";
-                return Json(new { success = false, html = "Has alcanzado el límite de contactos agregados por hoy." });
+                TempData["Error"] = "Has alcanzado el límite total de contactos permitidos (20).";
+                return Json(new { success = false, html = "Has alcanzado el límite total de contactos permitidos (20)." });
+            }
+
+            // Validar duplicados de teléfono o correo para este usuario
+            if (_context.Contactos.Any(c => c.Id_Usuario == usuario.IdUsuario && (c.Telefono == contacto.Telefono || c.Correo == contacto.Correo)))
+            {
+                TempData["Error"] = "Ya existe un contacto con ese teléfono o correo.";
+                return Json(new { success = false, html = "Ya existe un contacto con ese teléfono o correo." });
             }
 
             contacto.Id_Usuario = usuario.IdUsuario;
@@ -163,6 +169,13 @@ namespace ContactHUB.Controllers
             {
                 TempData["Error"] = "Has alcanzado el límite de ediciones de contactos por hoy.";
                 return Json(new { success = false, html = "Has alcanzado el límite de ediciones de contactos por hoy." });
+            }
+
+            // Validar duplicados de teléfono o correo para este usuario (ignorando el contacto actual)
+            if (_context.Contactos.Any(c => c.Id_Usuario == usuario.IdUsuario && c.IdContacto != contacto.IdContacto && (c.Telefono == contacto.Telefono || c.Correo == contacto.Correo)))
+            {
+                TempData["Error"] = "Ya existe otro contacto con ese teléfono o correo.";
+                return Json(new { success = false, html = "Ya existe otro contacto con ese teléfono o correo." });
             }
 
             var contactoDb = _context.Contactos.Include(c => c.ContactoEtiquetas).FirstOrDefault(c => c.IdContacto == contacto.IdContacto);
@@ -274,19 +287,18 @@ namespace ContactHUB.Controllers
                 contactosQuery = contactosQuery.Where(c => c.Id_Departamento == departamentoId);
             if (etiquetaId.HasValue)
                 contactosQuery = contactosQuery.Where(c => c.ContactoEtiquetas.Any(ce => ce.IdEtiqueta == etiquetaId));
-            if (orden == "recientes")
-                contactosQuery = contactosQuery.OrderByDescending(c => c.IdContacto);
-            else if (orden == "antiguos")
-                contactosQuery = contactosQuery.OrderBy(c => c.IdContacto);
+
+            // Ordenar por Apellido, Nombre (más útil para usuario)
+            contactosQuery = contactosQuery.OrderBy(c => c.Apellido).ThenBy(c => c.Nombre);
             var contactos = contactosQuery.ToList();
 
-            // Generar archivo Excel simple (CSV)
+            // Columnas: Nombre, Apellido, Teléfono, Correo, Departamento, Dirección, Etiquetas
             var csv = new System.Text.StringBuilder();
-            csv.AppendLine("Nombre,Apellido,Telefono,Correo,Direccion,Departamento,Etiquetas");
+            csv.AppendLine("Nombre,Apellido,Telefono,Correo,Departamento,Direccion,Etiquetas");
             foreach (var c in contactos)
             {
-                var etiquetas = c.ContactoEtiquetas != null ? string.Join("|", c.ContactoEtiquetas.Select(e => e.Etiqueta?.Nombre)) : "";
-                csv.AppendLine($"{EscapeCsv(c.Nombre)},{EscapeCsv(c.Apellido)},{EscapeCsv(c.Telefono)},{EscapeCsv(c.Correo)},{EscapeCsv(c.Direccion)},{EscapeCsv(c.Departamento?.Nombre)},{EscapeCsv(etiquetas)}");
+                var etiquetas = c.ContactoEtiquetas != null ? string.Join("|", c.ContactoEtiquetas.Select(e => e.Etiqueta?.Nombre).Where(n => !string.IsNullOrEmpty(n))) : "";
+                csv.AppendLine($"{EscapeCsv(c.Nombre)},{EscapeCsv(c.Apellido)},{EscapeCsv(c.Telefono)},{EscapeCsv(c.Correo)},{EscapeCsv(c.Departamento?.Nombre)},{EscapeCsv(c.Direccion)},{EscapeCsv(etiquetas)}");
             }
             var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
             return File(bytes, "text/csv", "contactos.csv");
@@ -335,9 +347,9 @@ namespace ContactHUB.Controllers
         private string EscapeCsv(string? value)
         {
             if (string.IsNullOrEmpty(value)) return "";
-            if (value.Contains(',') || value.Contains('"') || value.Contains('\n'))
-                return $"\"{value.Replace("\"", "\"\"")}";
-            return value;
+            var needsQuotes = value.Contains(',') || value.Contains('"') || value.Contains('\n') || value.Contains('\r');
+            var escaped = value.Replace("\"", "\"\"");
+            return needsQuotes ? $"\"{escaped}\"" : escaped;
         }
     }
 }

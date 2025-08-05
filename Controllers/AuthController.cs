@@ -113,10 +113,18 @@ namespace ContactHUB.Controllers
         {
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
             var hoy = DateTime.Today;
+            // Limite de registros por IP por día
             var registrosHoy = _context.AccionUsuarios.Count(a => a.IP == ip && a.TipoAccion == "registro" && a.Fecha >= hoy);
             if (registrosHoy >= 3)
             {
                 TempData["Error"] = "Has alcanzado el límite de registros por IP para hoy.";
+                return RedirectToAction("Register");
+            }
+            // Limite total de usuarios en el sistema
+            var totalUsuarios = _context.Usuarios.Count();
+            if (totalUsuarios >= 10)
+            {
+                TempData["Error"] = "Se ha alcanzado el límite máximo de usuarios registrados.";
                 return RedirectToAction("Register");
             }
 
