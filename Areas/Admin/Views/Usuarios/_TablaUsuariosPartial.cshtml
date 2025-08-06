@@ -1,0 +1,45 @@
+@model List<ContactHUB.Models.Usuario>
+<table id="usuariosTable" class="table table-hover align-middle mb-0">
+    <thead class="bg-gradient text-white" style="background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);" id="thead-usuarios">
+        <tr>
+            <th class="text-center">ID</th>
+            <th><i class="bi bi-person"></i> Usuario</th>
+            <th><i class="bi bi-person-badge"></i> Nombre</th>
+            <th><i class="bi bi-shield-lock"></i> Rol</th>
+            <th><i class="bi bi-gear"></i> Acción</th>
+            <th><i class="bi bi-check-circle"></i> Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var usuario in Model)
+    {
+        <tr class="align-middle">
+            <td class="text-center text-secondary">@usuario.IdUsuario</td>
+            <td class="fw-semibold">@usuario.UsuarioNombre</td>
+            <td>@usuario.Nombre</td>
+            <td>
+                <span class="badge rounded-pill bg-@(usuario.Rol?.Nombre == "Admin" ? "primary" : "secondary") px-3 py-2">
+                    <i class="bi bi-@(usuario.Rol?.Nombre == "Admin" ? "shield-lock" : "person")"></i> @usuario.Rol?.Nombre
+                </span>
+            </td>
+            <td>
+                <form asp-action="CambiarRol" method="post" class="d-flex align-items-center gap-2 mb-0">
+                    <input type="hidden" name="id" value="@usuario.IdUsuario" />
+                    <select name="rol" class="form-select form-select-sm w-auto shadow-sm">
+                        <option value="Usuario" selected="@(usuario.Rol?.Nombre == "Usuario" ? "selected" : null)">Usuario</option>
+                        <option value="Admin" selected="@(usuario.Rol?.Nombre == "Admin" ? "selected" : null)">Admin</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-gradient-primary text-white shadow-sm">
+                        <i class="bi bi-arrow-repeat"></i> Actualizar
+                    </button>
+                </form>
+            </td>
+            <td>
+                <span class="badge rounded-pill bg-@(usuario.Estado?.Nombre == "Activo" ? "success" : "secondary") px-3 py-2">
+                    <i class="bi bi-@(usuario.Estado?.Nombre == "Activo" ? "check-circle" : "slash-circle")"></i> @usuario.Estado?.Nombre
+                </span>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
