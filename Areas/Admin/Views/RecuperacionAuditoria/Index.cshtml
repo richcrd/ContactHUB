@@ -75,7 +75,8 @@
 $(function(){
     const rowsPerPage = 10;
     let currentPage = 1;
-    let rows = Array.from(document.querySelectorAll('#auditoriaTable tbody tr'));
+    const allRows = Array.from(document.querySelectorAll('#auditoriaTable tbody tr'));
+    let rows = allRows.slice();
 
     function renderTable() {
         rows.forEach((row, i) => {
@@ -107,15 +108,18 @@ $(function(){
 
     document.getElementById('searchInput').addEventListener('input', function() {
         const value = this.value.toLowerCase();
-        rows = Array.from(document.querySelectorAll('#auditoriaTable tbody tr')).filter(row => {
-            return row.textContent.toLowerCase().includes(value);
-        });
+        if (value === "") {
+            rows = allRows.slice();
+        } else {
+            rows = allRows.filter(row => {
+                return row.textContent.toLowerCase().includes(value);
+            });
+        }
         currentPage = 1;
         renderTable();
     });
 
     // Inicializar
-    rows = Array.from(document.querySelectorAll('#auditoriaTable tbody tr'));
     renderTable();
 
     // Soporte modo oscuro tabla

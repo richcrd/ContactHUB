@@ -15,7 +15,7 @@ namespace ContactHUB.Controllers
             _context = context;
         }
 
-        public IActionResult Index(string search, int? departamentoId, int? etiquetaId, string orden = "recientes")
+        public IActionResult Index(string search, int? departamentoId, int? etiquetaId, string orden = "recientes", int page = 1)
         {
             var usuarioNombre = User.Identity?.Name;
             if (string.IsNullOrEmpty(usuarioNombre))
@@ -55,7 +55,18 @@ namespace ContactHUB.Controllers
                 contactosQuery = contactosQuery.OrderBy(c => c.IdContacto);
             }
 
-            var contactos = contactosQuery.ToList();
+            int pageSize = 6;
+            int totalContactos = contactosQuery.Count();
+            var contactos = contactosQuery.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            var viewModel = new ContactHUB.ViewModels.ContactosPaginadosViewModel
+            {
+                Contactos = contactos,
+                PaginaActual = page,
+                TotalPaginas = (int)Math.Ceiling((double)totalContactos / pageSize),
+                TotalContactos = totalContactos,
+                PageSize = pageSize
+            };
 
             // Estadísticas
             var usuarioId = usuario.IdUsuario;
@@ -72,7 +83,7 @@ namespace ContactHUB.Controllers
             ViewBag.EtiquetaId = etiquetaId;
             ViewBag.Orden = orden;
 
-            return View(contactos);
+            return View(viewModel);
         }
 
 

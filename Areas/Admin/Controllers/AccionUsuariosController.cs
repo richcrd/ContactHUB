@@ -17,9 +17,15 @@ namespace ContactHUB.Areas.Admin.Controllers
         {
             try
             {
+                var zonaNicaragua = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
                 var acciones = _context.AccionUsuarios
                     .OrderByDescending(a => a.Fecha)
                     .Take(200)
+                    .ToList()
+                    .Select(a => {
+                        a.Fecha = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(a.Fecha, DateTimeKind.Utc), zonaNicaragua);
+                        return a;
+                    })
                     .ToList();
                 return View(acciones);
             }

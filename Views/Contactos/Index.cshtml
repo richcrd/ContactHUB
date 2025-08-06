@@ -73,21 +73,15 @@ $(function(){
         }
     });
 </script>
-@model IEnumerable<ContactHUB.Models.Contacto>
+@model ContactHUB.ViewModels.ContactosPaginadosViewModel
 @{
     ViewData["Title"] = "Mis Contactos";
-}
-@{
     ViewBag.Title = "Contactos";
     var departamentos = ViewBag.Departamentos as List<ContactHUB.Models.Departamento>;
     var etiquetas = ViewBag.Etiquetas as List<ContactHUB.Models.Etiqueta>;
     var search = ViewBag.Search as string;
     int? departamentoId = ViewBag.DepartamentoId;
     int? etiquetaId = ViewBag.EtiquetaId;
-}
-
-@{
-    // Estadísticas
     var totalContactos = ViewBag.TotalContactos as int? ?? 0;
     var totalActivos = ViewBag.TotalActivos as int? ?? 0;
     var agregadosHoy = ViewBag.AgregadosHoy as int? ?? 0;
@@ -198,14 +192,14 @@ $(function(){
     </div>
 </div>
 
-@if (!Model.Any())
+@if (!Model.Contactos.Any())
 {
     <div class="alert alert-info">No tienes contactos guardados.</div>
 }
 else
 {
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @foreach (var c in Model)
+        @foreach (var c in Model.Contactos)
         {
             <div class="col">
                 <div class="card h-100 border rounded-4">
@@ -248,6 +242,17 @@ else
             </div>
         }
     </div>
+    <!-- Paginación -->
+    <nav>
+        <ul class="pagination justify-content-center mt-4">
+            @for (int i = 1; i <= Model.TotalPaginas; i++)
+            {
+                <li class="page-item @(i == Model.PaginaActual ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new { search = search, departamentoId = departamentoId, etiquetaId = etiquetaId, orden = ViewBag.Orden, page = i })">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
 }
 
 
