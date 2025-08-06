@@ -1,0 +1,24 @@
+@model IEnumerable<ContactHUB.Models.AccionUsuario>
+<table class="table table-hover table-bordered" id="tabla-acciones">
+    <thead class="table-light" id="thead-acciones">
+        <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>IP</th>
+            <th>Tipo de Acción</th>
+            <th>Fecha</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var a in Model)
+    {
+        <tr>
+            <td>@a.IdAccion</td>
+            <td>@a.IdUsuario</td>
+            <td>@a.IP</td>
+            <td>@a.TipoAccion</td>
+            <td>@a.Fecha.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+        </tr>
+    }
+    </tbody>
+</table>

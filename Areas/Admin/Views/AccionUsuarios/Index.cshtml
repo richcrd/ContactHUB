@@ -4,70 +4,8 @@
 }
 <div class="container py-4">
     <h2 class="mb-4">Acciones de Usuarios</h2>
-    <table class="table table-hover table-bordered" id="tabla-acciones">
-        <thead class="table-light" id="thead-acciones">
-            <tr>
-                <th>ID</th>
-                <th>Usuario</th>
-                <th>IP</th>
-                <th>Tipo de Acción</th>
-                <th>Fecha</th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (var a in Model)
-        {
-            <tr>
-                <td>@a.IdAccion</td>
-                <td>@a.IdUsuario</td>
-                <td>@a.IP</td>
-                <td>@a.TipoAccion</td>
-                <td>@a.Fecha.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+    <partial name="_TablaAccionesPartial" model="Model" />
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
-<script>
-// Soporte de modo oscuro para tabla de acciones
-function applyDarkTableAcciones() {
-    if (document.body.classList.contains('theme-dark')) {
-        $('#tabla-acciones').addClass('table-dark');
-        $('#thead-acciones').removeClass('table-light').addClass('table-dark');
-        $('#tabla-acciones tbody tr').css('background-color', ''); // reset
-    } else {
-        $('#tabla-acciones').removeClass('table-dark');
-        $('#thead-acciones').removeClass('table-dark').addClass('table-light');
-        $('#tabla-acciones tbody tr').css('background-color', ''); // reset
-    }
-}
-$(function(){
-    applyDarkTableAcciones();
-    const observerAcciones = new MutationObserver(applyDarkTableAcciones);
-    observerAcciones.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-});
-</script>
-            <tr>
-                <th>ID</th>
-                <th>Usuario</th>
-                <th>IP</th>
-                <th>Tipo de Acción</th>
-                <th>Fecha</th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (var a in Model)
-        {
-            <tr>
-                <td>@a.IdAccion</td>
-                <td>@a.IdUsuario</td>
-                <td>@a.IP</td>
-                <td>@a.TipoAccion</td>
-                <td>@a.Fecha.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
-            </tr>
-        }
-        </tbody>
-    </table>
-</div>
+<script src="~/js/acciones.js"></script>
