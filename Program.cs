@@ -17,6 +17,17 @@ builder.Services.AddAuthentication("Cookies")
     });
 builder.Services.AddAuthorization();
 
+builder.Services.AddDbContext<ContactDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddAuthentication("Cookies")
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.LogoutPath = "/Auth/Logout";
+    });
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -41,7 +52,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
-
 
 
 // Area route mapping for Admin controllers
