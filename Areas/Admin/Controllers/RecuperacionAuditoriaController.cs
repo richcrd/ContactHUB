@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ContactHUB.Data;
-using System.Linq;
+using ContactHUB.Areas.Admin.Controllers.Helpers;
 
 namespace ContactHUB.Controllers.Admin
 {
@@ -17,13 +17,10 @@ namespace ContactHUB.Controllers.Admin
 
         public IActionResult Index()
         {
-            // Solo admin
-            var usuario = User.Identity?.Name != null ? _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == User.Identity.Name) : null;
-            if (usuario == null || usuario.IdRol != 1)
-            {
+            var usuarioNombre = User.Identity?.Name;
+            if (!RecuperacionAuditoriaHelper.IsAdmin(_context, usuarioNombre))
                 return Forbid();
-            }
-            var intentos = _context.RecuperacionIntentos.OrderByDescending(i => i.Fecha).Take(200).ToList();
+            var intentos = RecuperacionAuditoriaHelper.GetIntentos(_context);
             return View(intentos);
         }
     }

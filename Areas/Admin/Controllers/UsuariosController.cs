@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using ContactHUB.Data;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using ContactHUB.Areas.Admin.Controllers.Helpers;
 
 namespace ContactHUB.Controllers.Admin
 {
@@ -20,39 +21,28 @@ namespace ContactHUB.Controllers.Admin
 
         public IActionResult Index()
         {
-            var usuario = User.Identity?.Name != null ? _context.Usuarios.Include(u => u.Rol).FirstOrDefault(u => u.UsuarioNombre == User.Identity.Name) : null;
-            if (usuario == null || usuario.Rol?.Nombre != "Admin")
-            {
+            var usuarioActual = UsuariosHelper.GetUsuarioActual(_context, User.Identity?.Name);
+            if (usuarioActual == null || usuarioActual.Rol?.Nombre != "Admin")
                 return Forbid();
-            }
-            var usuarios = _context.Usuarios.ToList();
+            var usuarios = UsuariosHelper.GetUsuarios(_context);
             return View(usuarios);
         }
 
         [HttpPost]
         public IActionResult CambiarRol(int id, string rol)
         {
-            var usuarioActual = User.Identity?.Name != null ? _context.Usuarios.Include(u => u.Rol).FirstOrDefault(u => u.UsuarioNombre == User.Identity.Name) : null;
+            var usuarioActual = UsuariosHelper.GetUsuarioActual(_context, User.Identity?.Name);
             if (usuarioActual == null || usuarioActual.Rol?.Nombre != "Admin")
-            {
                 return Forbid();
-            }
             var usuario = _context.Usuarios.FirstOrDefault(u => u.IdUsuario == id);
             if (usuario == null)
-            {
-                TempData["Error"] = "Usuario no encontrado.";
-                return RedirectToAction("Index");
-            }
-            var rolObj = _context.Roles.FirstOrDefault(r => r.Nombre == rol);
+                return UsuariosResponseHelper.Error(this, "Usuario no encontrado.");
+            var rolObj = UsuariosHelper.GetRol(_context, rol);
             if (rolObj == null)
-            {
-                TempData["Error"] = "Rol no válido.";
-                return RedirectToAction("Index");
-            }
+                return UsuariosResponseHelper.Error(this, "Rol no válido.");
             usuario.IdRol = rolObj.IdRol;
             _context.SaveChanges();
-            TempData["Success"] = $"Rol actualizado para {usuario.UsuarioNombre}.";
-            return RedirectToAction("Index");
+            return UsuariosResponseHelper.Success(this, $"Rol actualizado para {usuario.UsuarioNombre}.");
         }
     }
 }
