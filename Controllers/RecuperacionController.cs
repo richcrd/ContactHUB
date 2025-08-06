@@ -14,10 +14,12 @@ namespace ContactHUB.Areas.Admin.Controllers
     {
         private readonly ContactDbContext _context;
         private readonly IConfiguration _config;
+        private readonly ContactHUB.Helpers.RecuperacionHelper _helper;
         public RecuperacionController(ContactDbContext context, IConfiguration config)
         {
             _context = context;
             _config = config;
+            _helper = new ContactHUB.Helpers.RecuperacionHelper(_context, _config);
         }
 
         [HttpGet]
@@ -30,47 +32,14 @@ namespace ContactHUB.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult Solicitar(string correo)
         {
-            if (string.IsNullOrWhiteSpace(correo))
+            if (!_helper.ValidarCorreo(correo))
             {
                 TempData["Error"] = "Debes ingresar tu correo.";
                 return View();
             }
-
-            // Generar OTP
-            var codigo = new Random().Next(100000, 999999).ToString();
-            var expira = DateTime.UtcNow.AddMinutes(10);
-
-            // Guardar OTP
-            _context.RecuperacionOtps.Add(new RecuperacionOtp
-            {
-                Correo = correo,
-                Codigo = codigo,
-                Expira = expira,
-                Usado = false
-            });
-            _context.SaveChanges();
-
-            // Enviar OTP por correo
-            string mensaje = $"Tu código de recuperación es: {codigo}. Expira en 10 minutos.";
-            bool enviado = false;
-            try
-            {
-                var smtpHost = _config["Smtp:Host"] ?? string.Empty;
-                var smtpPortStr = _config["Smtp:Port"] ?? "587";
-                var smtpUser = _config["Smtp:User"] ?? string.Empty;
-                var smtpPass = _config["Smtp:Pass"] ?? string.Empty;
-                var smtpFrom = _config["Smtp:From"] ?? string.Empty;
-                var smtp = new SmtpClient(smtpHost, int.TryParse(smtpPortStr, out var port) ? port : 587);
-                smtp.Credentials = new NetworkCredential(smtpUser, smtpPass);
-                smtp.EnableSsl = true;
-                smtp.Send(smtpFrom, correo, "Código de recuperación", mensaje);
-                enviado = true;
-            }
-            catch
-            {
-                TempData["Info"] = $"Código de recuperación: {codigo}";
-            }
-
+            var codigo = _helper.GenerarOtp();
+            _helper.GuardarOtp(correo, codigo);
+            bool enviado = _helper.EnviarOtpPorCorreo(correo, codigo, info => TempData["Info"] = info);
             TempData["Correo"] = correo;
             if (enviado)
                 TempData["Success"] = "Hemos enviado a tu correo el código OTP de recuperación.";
@@ -89,19 +58,12 @@ namespace ContactHUB.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult ValidarOtp(string correo, string codigo)
         {
-            var otp = _context.RecuperacionOtps
-                .FirstOrDefault(o => o.Correo == correo && o.Codigo == codigo && !o.Usado && o.Expira > DateTime.UtcNow);
-
-            if (otp == null)
+            if (!_helper.ValidarOtpCodigo(correo, codigo))
             {
                 TempData["Error"] = "Código incorrecto o expirado.";
                 TempData["Correo"] = correo;
                 return RedirectToAction("ValidarOtp");
             }
-
-            otp.Usado = true;
-            _context.SaveChanges();
-
             TempData["Correo"] = correo;
             TempData["OtpValidado"] = true;
             TempData["Success"] = "Código OTP validado correctamente. Ahora puedes restablecer tu contraseña.";
@@ -123,39 +85,19 @@ namespace ContactHUB.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult Restablecer(string correo, string nueva, string repetir)
         {
-            if (string.IsNullOrWhiteSpace(nueva) || string.IsNullOrWhiteSpace(repetir))
+            var error = _helper.ValidarRestablecer(nueva, repetir);
+            if (!string.IsNullOrEmpty(error))
             {
-                TempData["Error"] = "Todos los campos son obligatorios.";
+                TempData["Error"] = error;
                 TempData["Correo"] = correo;
                 TempData["OtpValidado"] = true;
                 return RedirectToAction("Restablecer");
             }
-            if (nueva != repetir)
-            {
-                TempData["Error"] = "Las contraseñas no coinciden.";
-                TempData["Correo"] = correo;
-                TempData["OtpValidado"] = true;
-                return RedirectToAction("Restablecer");
-            }
-            if (nueva.Length < 8 || nueva.Length > 30)
-            {
-                TempData["Error"] = "La contraseña debe tener entre 8 y 30 caracteres.";
-                TempData["Correo"] = correo;
-                TempData["OtpValidado"] = true;
-                return RedirectToAction("Restablecer");
-            }
-
-            // Buscar usuario por Email
-            var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == correo);
-            if (usuario == null)
+            if (!_helper.RestablecerClave(correo, nueva))
             {
                 TempData["Error"] = "No existe usuario con ese correo.";
                 return RedirectToAction("Solicitar");
             }
-            var hasher = new PasswordHasher<Usuario>();
-            usuario.Clave = hasher.HashPassword(usuario, nueva);
-            _context.SaveChanges();
-
             TempData["Success"] = "Contraseña restablecida correctamente. Ya puedes iniciar sesión.";
             return RedirectToAction("Login", "Auth", new { area = "" });
         }
