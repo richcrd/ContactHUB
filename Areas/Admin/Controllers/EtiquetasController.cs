@@ -18,15 +18,16 @@ namespace ContactHUB.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            var etiquetas = _context.Etiquetas.ToList();
+            var etiquetas = Helpers.EtiquetasHelper.GetEtiquetas(_context);
             return View(etiquetas);
         }
 
         public IActionResult Crear()
         {
+            var model = new Etiqueta { Id_Estado = 1 };
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                return PartialView("_EtiquetaPartial", new Etiqueta { Id_Estado = 1 });
-            return View(new Etiqueta { Id_Estado = 1 });
+                return PartialView("_EtiquetaPartial", model);
+            return View(model);
         }
 
         [HttpPost]
@@ -35,17 +36,13 @@ namespace ContactHUB.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                etiqueta.Id_Estado = 1; // Asignar estado por defecto
-                _context.Etiquetas.Add(etiqueta);
-                _context.SaveChanges();
-                TempData["Success"] = "Etiqueta creada correctamente.";
+                Helpers.EtiquetasHelper.AddEtiqueta(_context, etiqueta);
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     return Content("{\"success\":true}", "application/json");
-                return RedirectToAction(nameof(Index));
+                return Helpers.EtiquetasResponseHelper.Success(this, "Etiqueta creada correctamente.");
             }
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                // Devolver errores de ModelState para depuración
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                 var html = RenderPartialViewToString("_EtiquetaPartial", etiqueta);
                 return Content($"{{\"success\":false,\"html\":{System.Text.Json.JsonSerializer.Serialize(html)},\"errors\":{System.Text.Json.JsonSerializer.Serialize(errors)}}}", "application/json");
@@ -55,7 +52,7 @@ namespace ContactHUB.Areas.Admin.Controllers
 
         public IActionResult Editar(int id)
         {
-            var etiqueta = _context.Etiquetas.Find(id);
+            var etiqueta = Helpers.EtiquetasHelper.GetEtiqueta(_context, id);
             if (etiqueta == null) return NotFound();
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 return PartialView("_EtiquetaPartial", etiqueta);
@@ -68,12 +65,10 @@ namespace ContactHUB.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Etiquetas.Update(etiqueta);
-                _context.SaveChanges();
-                TempData["Success"] = "Etiqueta actualizada correctamente.";
+                Helpers.EtiquetasHelper.UpdateEtiqueta(_context, etiqueta);
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     return Content("{\"success\":true}", "application/json");
-                return RedirectToAction(nameof(Index));
+                return Helpers.EtiquetasResponseHelper.Success(this, "Etiqueta actualizada correctamente.");
             }
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
@@ -113,12 +108,10 @@ namespace ContactHUB.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Eliminar(int id)
         {
-            var etiqueta = _context.Etiquetas.Find(id);
+            var etiqueta = Helpers.EtiquetasHelper.GetEtiqueta(_context, id);
             if (etiqueta == null) return NotFound();
-            _context.Etiquetas.Remove(etiqueta);
-            _context.SaveChanges();
-            TempData["Success"] = "Etiqueta eliminada correctamente.";
-            return RedirectToAction(nameof(Index));
+            Helpers.EtiquetasHelper.RemoveEtiqueta(_context, etiqueta);
+            return Helpers.EtiquetasResponseHelper.Success(this, "Etiqueta eliminada correctamente.");
         }
     }
 }
