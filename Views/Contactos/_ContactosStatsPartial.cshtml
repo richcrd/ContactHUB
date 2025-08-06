@@ -1,0 +1,47 @@
+@model dynamic
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-custom-azul text-white">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-people-fill display-5 me-3"></i>
+                <div>
+                    <h6 class="mb-0">Total Contactos</h6>
+                    <h3 class="mb-0">@Model.totalContactos</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-custom-naranja text-white">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-person-check-fill display-5 me-3"></i>
+                <div>
+                    <h6 class="mb-0">Contactos Activos</h6>
+                    <h3 class="mb-0">@Model.totalActivos</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-custom-verderosa text-white">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-plus-circle-fill display-5 me-3"></i>
+                <div>
+                    <h6 class="mb-0">Agregados Hoy</h6>
+                    <h3 class="mb-0">@Model.agregadosHoy</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-custom-rojo text-white">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-dash-circle-fill display-5 me-3"></i>
+                <div>
+                    <h6 class="mb-0">Eliminados Hoy</h6>
+                    <h3 class="mb-0">@Model.eliminadosHoy</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

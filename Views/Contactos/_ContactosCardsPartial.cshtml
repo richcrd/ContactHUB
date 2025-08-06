@@ -1,0 +1,45 @@
+@model IEnumerable<ContactHUB.Models.Contacto>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    @foreach (var c in Model)
+    {
+        <div class="col">
+            <div class="card h-100 border rounded-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width:48px;height:48px;font-size:1.5rem;">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">@c.Nombre @c.Apellido</h5>
+                            <small class="text-muted">@(c.Departamento != null ? c.Departamento.Nombre : "Sin departamento")</small>
+                        </div>
+                    </div>
+                    <ul class="list-unstyled mb-3">
+                        <li><i class="bi bi-telephone me-2"></i> <strong>Teléfono:</strong> @c.Telefono</li>
+                        @if (!string.IsNullOrWhiteSpace(c.Correo)) {
+                            <li><i class="bi bi-envelope me-2"></i> <strong>Correo:</strong> @c.Correo</li>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(c.Direccion)) {
+                            <li><i class="bi bi-geo-alt me-2"></i> <strong>Dirección:</strong> @c.Direccion</li>
+                        }
+                    </ul>
+                    <div class="mb-2">
+                        @if (c.ContactoEtiquetas != null && c.ContactoEtiquetas.Any()) {
+                            foreach (var et in c.ContactoEtiquetas) {
+                                <span class="badge bg-custom-rojo text-white me-1 mb-1">@et.Etiqueta?.Nombre</span>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 d-flex justify-content-end gap-2">
+                    <button class="btn btn-outline-warning btn-sm" title="Editar" onclick="openContactoModal('@Url.Action("Edit", "Contactos", new { id = c.IdContacto })', 'Editar Contacto')">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" title="Eliminar" onclick="showDeleteModal(@c.IdContacto, '@c.Nombre @c.Apellido')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
