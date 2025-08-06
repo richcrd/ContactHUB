@@ -1,10 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
 using ContactHUB.Data;
-using ContactHUB.Models;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ContactHUB.Controllers
 {
@@ -36,29 +32,16 @@ namespace ContactHUB.Controllers
             var usuarioNombre = User.Identity?.Name;
             var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuarioNombre);
             if (usuario == null)
-            {
-                TempData["Error"] = "Usuario no encontrado.";
-                return RedirectToAction("Index");
-            }
+                return Error("Usuario no encontrado.");
             if (string.IsNullOrWhiteSpace(nuevoNombre) || nuevoNombre.Length < 4 || nuevoNombre.Length > 50)
-            {
-                TempData["Error"] = "El nombre debe tener entre 4 y 50 caracteres.";
-                return RedirectToAction("Index");
-            }
+                return Error("El nombre debe tener entre 4 y 50 caracteres.");
             if (nuevoNombre == usuario.Nombre)
-            {
-                TempData["Error"] = "El nuevo nombre no puede ser igual al anterior.";
-                return RedirectToAction("Index");
-            }
+                return Error("El nuevo nombre no puede ser igual al anterior.");
             if (_context.Usuarios.Any(u => u.Nombre == nuevoNombre && u.IdUsuario != usuario.IdUsuario))
-            {
-                TempData["Error"] = "Ya existe un usuario con ese nombre.";
-                return RedirectToAction("Index");
-            }
+                return Error("Ya existe un usuario con ese nombre.");
             usuario.Nombre = nuevoNombre;
             _context.SaveChanges();
-            TempData["Success"] = "Nombre actualizado correctamente.";
-            return RedirectToAction("Index");
+            return Success("Nombre actualizado correctamente.");
         }
 
         [HttpPost]
@@ -67,54 +50,33 @@ namespace ContactHUB.Controllers
             var usuarioNombre = User.Identity?.Name;
             var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuarioNombre);
             if (usuario == null)
-            {
-                TempData["Error"] = "Usuario no encontrado.";
-                return RedirectToAction("Index");
-            }
-            if (string.IsNullOrWhiteSpace(actual) || string.IsNullOrWhiteSpace(nueva) || string.IsNullOrWhiteSpace(repetir))
-            {
-                TempData["Error"] = "Todos los campos son obligatorios.";
-                return RedirectToAction("Index");
-            }
+                return Error("Usuario no encontrado.");
+            if (!Helpers.ProfilePasswordHelper.IsValidLength(actual) || !Helpers.ProfilePasswordHelper.IsValidLength(nueva) || !Helpers.ProfilePasswordHelper.IsValidLength(repetir))
+                return Error("Todos los campos son obligatorios y deben tener entre 8 y 30 caracteres.");
             if (nueva != repetir)
-            {
-                TempData["Error"] = "La nueva contraseña y la repetición no coinciden.";
-                return RedirectToAction("Index");
-            }
-            if (nueva.Length < 8 || nueva.Length > 30)
-            {
-                TempData["Error"] = "La nueva contraseña debe tener entre 8 y 30 caracteres.";
-                return RedirectToAction("Index");
-            }
-            // Validar que la nueva contraseña no sea igual a la anterior
-            var hasher = new PasswordHasher<Usuario>();
-            var result = hasher.VerifyHashedPassword(usuario, usuario.Clave, actual);
-            if (result != PasswordVerificationResult.Success)
-            {
-                TempData["Error"] = "La contraseña actual es incorrecta.";
-                return RedirectToAction("Index");
-            }
-            if (hasher.VerifyHashedPassword(usuario, usuario.Clave, nueva) == PasswordVerificationResult.Success)
-            {
-                TempData["Error"] = "La nueva contraseña no puede ser igual a la anterior.";
-                return RedirectToAction("Index");
-            }
-            // Validar que la contraseña no sea igual al nombre de usuario
-            if (nueva == usuario.UsuarioNombre || nueva == usuario.Nombre)
-            {
-                TempData["Error"] = "La contraseña no puede ser igual a tu nombre o usuario.";
-                return RedirectToAction("Index");
-            }
-            // Validar contraseñas comunes (puedes ampliar la lista)
-            string[] comunes = { "12345678", "password", "contraseña", "qwerty", "123456789", "123456", "11111111", "123123123" };
-            if (comunes.Contains(nueva))
-            {
-                TempData["Error"] = "La contraseña es demasiado común. Elige una más segura.";
-                return RedirectToAction("Index");
-            }
-            usuario.Clave = hasher.HashPassword(usuario, nueva);
+                return Error("La nueva contraseña y la repetición no coinciden.");
+            if (!Helpers.ProfilePasswordHelper.VerifyCurrent(actual, usuario))
+                return Error("La contraseña actual es incorrecta.");
+            if (Helpers.ProfilePasswordHelper.IsSameAsOld(nueva, usuario))
+                return Error("La nueva contraseña no puede ser igual a la anterior.");
+            if (Helpers.ProfilePasswordHelper.IsSameAsUser(nueva, usuario))
+                return Error("La contraseña no puede ser igual a tu nombre o usuario.");
+            if (Helpers.ProfilePasswordHelper.IsCommonPassword(nueva))
+                return Error("La contraseña es demasiado común. Elige una más segura.");
+            usuario.Clave = Helpers.ProfilePasswordHelper.Hash(nueva, usuario);
             _context.SaveChanges();
-            TempData["Success"] = "Contraseña actualizada correctamente. Por seguridad, considera cerrar sesión y volver a ingresar.";
+            return Success("Contraseña actualizada correctamente. Por seguridad, considera cerrar sesión y volver a ingresar.");
+        }
+        // Métodos auxiliares para simplificar respuestas
+        private IActionResult Error(string mensaje)
+        {
+            TempData["Error"] = mensaje;
+            return RedirectToAction("Index");
+        }
+
+        private IActionResult Success(string mensaje)
+        {
+            TempData["Success"] = mensaje;
             return RedirectToAction("Index");
         }
     }

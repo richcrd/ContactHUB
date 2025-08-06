@@ -51,7 +51,7 @@ namespace ContactHUB.Controllers
             try
             {
                 var user = _authService.GetActiveUser(model.Usuario);
-                if (user != null && Helpers.PasswordHelper.VerifyPassword(user, user.Clave, model.Clave))
+                if (user != null && PasswordHelper.VerifyPassword(user, user.Clave, model.Clave))
                 {
                     var claims = new List<System.Security.Claims.Claim>
                     {
