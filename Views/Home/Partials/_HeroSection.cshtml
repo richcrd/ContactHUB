@@ -1,0 +1,18 @@
+<section class="py-5 bg-custom-azul text-white text-center rounded-4 mb-4 shadow">
+    <div class="container">
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            <h1 class="display-3 fw-bold mb-3">Bienvenido, @User.FindFirst("Nombre")?.Value!</h1>
+            <p class="lead mb-4">Gestiona tus contactos de forma segura, rápida y moderna. ¡Todo en un solo lugar!</p>
+            <a href="/Contactos" class="btn btn-warning btn-lg me-2"><i class="bi bi-person-lines-fill"></i> Ver Contactos</a>
+            <a href="/Contactos" class="btn btn-light btn-lg"><i class="bi bi-person-plus"></i> Agregar Contacto</a>
+        }
+        else
+        {
+            <h1 class="display-3 fw-bold mb-3">Bienvenido a ContactHUB</h1>
+            <p class="lead mb-4">Regístrate o inicia sesión para gestionar tus contactos de forma segura y moderna.</p>
+            <a href="/Auth/Login" class="btn btn-primary btn-lg me-2"><i class="bi bi-box-arrow-in-right"></i> Iniciar sesión</a>
+            <a href="/Auth/Register" class="btn btn-outline-light btn-lg"><i class="bi bi-person-plus"></i> Registrarse</a>
+        }
+    </div>
+</section>

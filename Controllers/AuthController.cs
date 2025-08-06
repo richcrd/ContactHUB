@@ -1,123 +1,160 @@
 using Microsoft.AspNetCore.Mvc;
-using ContactHUB.Data;
 using ContactHUB.Models;
-using System.Linq;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
+using ContactHUB.Services;
+using ContactHUB.ViewModels;
+using ContactHUB.Helpers;
 
 namespace ContactHUB.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly ContactDbContext _context;
+        private readonly AuthService _authService;
         private readonly ILogger<AuthController> _logger;
-        public AuthController(ContactDbContext context, ILogger<AuthController> logger)
+        public AuthController(AuthService authService, ILogger<AuthController> logger)
         {
-            _context = context;
+            _authService = authService;
             _logger = logger;
         }
 
         [HttpGet]
         public IActionResult Login()
         {
-            return View();
+            return View(new LoginViewModel());
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string usuario, string clave)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            // Validaciones del lado del servidor
-            if (string.IsNullOrWhiteSpace(usuario) || usuario.Length < 4 || usuario.Length > 10 || !System.Text.RegularExpressions.Regex.IsMatch(usuario, "^[a-zA-Z0-9_]+$"))
+            if (!ModelState.IsValid)
             {
-                ViewBag.Error = "El usuario debe tener entre 4 y 10 caracteres y solo puede contener letras, números y guion bajo.";
-                return View();
+                return View(model);
             }
-            if (string.IsNullOrWhiteSpace(clave) || clave.Length < 8 || clave.Length > 30)
+            if (!UserValidationService.ValidarUsuarioLogin(model.Usuario, out string errorUsuario))
             {
-                ViewBag.Error = "La clave debe tener entre 8 y 30 caracteres.";
-                return View();
+                ModelState.AddModelError("Usuario", errorUsuario);
+                return View(model);
+            }
+            if (!UserValidationService.ValidarClave(model.Clave, out string errorClave))
+            {
+                ModelState.AddModelError("Clave", errorClave);
+                return View(model);
+            }
+            
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+            var hoy = DateTime.Today;
+            if (_authService.SuperaIntentosFallidos(ip, hoy, out string errorIntentos))
+            {
+                TempData["Error"] = errorIntentos;
+                return RedirectToAction("Login");
             }
             try
             {
-                var user = _context.Usuarios.FirstOrDefault(u => u.UsuarioNombre == usuario && u.Estado.Nombre == "Activo");
-                if (user != null)
+                var user = _authService.GetActiveUser(model.Usuario);
+                if (user != null && PasswordHelper.VerifyPassword(user, user.Clave, model.Clave))
                 {
-                    var hasher = new PasswordHasher<Usuario>();
-                    var result = hasher.VerifyHashedPassword(user, user.Clave, clave);
-                    if (result == PasswordVerificationResult.Success)
+                    var claims = new List<System.Security.Claims.Claim>
                     {
-                        var claims = new List<System.Security.Claims.Claim>
-                        {
-                            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.UsuarioNombre),
-                            new System.Security.Claims.Claim("Nombre", user.Nombre)
-                        };
-                        var identity = new System.Security.Claims.ClaimsIdentity(claims, "Cookies");
-                        var principal = new System.Security.Claims.ClaimsPrincipal(identity);
-                        await HttpContext.SignInAsync("Cookies", principal);
-                        return RedirectToAction("Index", "Home");
-                    }
+                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.UsuarioNombre),
+                        new System.Security.Claims.Claim("Nombre", user.Nombre),
+                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, user.Rol.Nombre)
+                    };
+                    var identity = new System.Security.Claims.ClaimsIdentity(claims, "Cookies");
+                    var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+                    await HttpContext.SignInAsync("Cookies", principal);
+                    TempData["Success"] = $"¡Bienvenido, {user.Nombre}! Has iniciado sesión correctamente.";
+                    return RedirectToAction("Index", "Home");
                 }
-                ViewBag.Error = "Usuario o clave incorrectos";
+
+                _authService.RegisterAction(new AccionUsuario
+                {
+                    IdUsuario = user?.IdUsuario,
+                    IP = ip,
+                    TipoAccion = "login_fail",
+                    Fecha = DateTime.Now
+                });
+                TempData["Error"] = "Usuario o clave incorrectos";
+                return View(model);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error en Login: {Message}", ex.Message);
-                ViewBag.Error = "No se pudo conectar con la base de datos. Intente más tarde.";
+                TempData["Error"] = "No se pudo conectar con la base de datos. Intente más tarde.";
+                return RedirectToAction("Login");
             }
-            return View();
         }
 
         [HttpGet]
         public IActionResult Register()
         {
-            return View();
+            return View(new RegisterViewModel());
         }
 
         [HttpPost]
-        public IActionResult Register(string usuario, string nombre, string clave)
+        public IActionResult Register(RegisterViewModel model)
         {
-            if (string.IsNullOrWhiteSpace(usuario) || usuario.Length < 4 || usuario.Length > 10 || !System.Text.RegularExpressions.Regex.IsMatch(usuario, "^[a-zA-Z0-9_]+$"))
+            if (!ModelState.IsValid)
             {
-                ViewBag.Error = "El usuario debe tener entre 4 y 10 caracteres y solo puede contener letras, números y guion bajo.";
-                return View();
+                return View(model);
             }
-            if (string.IsNullOrWhiteSpace(nombre) || nombre.Length < 4 || nombre.Length > 50 || !System.Text.RegularExpressions.Regex.IsMatch(nombre, "^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+            var hoy = DateTime.Today;
+            if (_authService.SuperaLimiteRegistrosPorIp(ip, hoy, out string errorIp))
             {
-                ViewBag.Error = "El nombre debe tener entre 4 y 50 caracteres y solo puede contener letras y espacios.";
-                return View();
+                ModelState.AddModelError(string.Empty, errorIp);
+                return View(model);
             }
-            if (string.IsNullOrWhiteSpace(clave) || clave.Length < 8 || clave.Length > 30)
+            if (_authService.SuperaLimiteUsuarios(out string errorUsuarios))
             {
-                ViewBag.Error = "La clave debe tener entre 8 y 30 caracteres.";
-                return View();
+                ModelState.AddModelError(string.Empty, errorUsuarios);
+                return View(model);
+            }
+            if (!UserValidationService.ValidarUsuarioLogin(model.Usuario, out string errorUsuario))
+            {
+                ModelState.AddModelError("Usuario", errorUsuario);
+                return View(model);
+            }
+            if (!UserValidationService.ValidarNombre(model.Nombre, out string errorNombre))
+            {
+                ModelState.AddModelError("Nombre", errorNombre);
+                return View(model);
+            }
+            if (!UserValidationService.ValidarClave(model.Clave, out string errorClave))
+            {
+                ModelState.AddModelError("Clave", errorClave);
+                return View(model);
             }
             try
             {
-                // Estado activo por defecto (IdEstado = 1)
-                var existe = _context.Usuarios.Any(u => u.UsuarioNombre == usuario);
-                if (existe)
+                if (_authService.UserExists(model.Usuario))
                 {
-                    ViewBag.Error = "El usuario ya existe.";
-                    return View();
+                    TempData["Error"] = "El usuario ya existe.";
+                    return RedirectToAction("Register");
                 }
-                var hasher = new PasswordHasher<Usuario>();
                 var user = new Usuario
                 {
-                    UsuarioNombre = usuario,
-                    Nombre = nombre,
-                    Id_Estado = 1 // Activo
+                    UsuarioNombre = model.Usuario,
+                    Nombre = model.Nombre,
+                    Id_Estado = 1,
+                    IdRol = 2
                 };
-                user.Clave = hasher.HashPassword(user, clave);
-                _context.Usuarios.Add(user);
-                _context.SaveChanges();
-                ViewBag.Message = "Usuario registrado exitosamente.";
+                user.Clave = PasswordHelper.HashPassword(user, model.Clave);
+                _authService.RegisterUser(user);
+                _authService.RegisterAction(new AccionUsuario
+                {
+                    IP = ip,
+                    TipoAccion = "registro",
+                    Fecha = DateTime.Now
+                });
+
+                TempData["Success"] = "Usuario registrado exitosamente.";
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error en Register: {Message}", ex.Message);
-                ViewBag.Error = "No se pudo conectar con la base de datos. Intente más tarde.";
-                return View();
+                TempData["Error"] = "No se pudo conectar con la base de datos. Intente más tarde.";
+                return RedirectToAction("Register");
             }
         }
 
@@ -125,6 +162,7 @@ namespace ContactHUB.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync("Cookies");
+            TempData["Success"] = "Sesión cerrada correctamente.";
             return RedirectToAction("Login");
         }
     }

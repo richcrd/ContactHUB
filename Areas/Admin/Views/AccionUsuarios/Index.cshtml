@@ -1,0 +1,11 @@
+@model IEnumerable<ContactHUB.Models.AccionUsuario>
+@{
+    ViewData["Title"] = "Acciones de Usuarios";
+}
+<div class="container py-4">
+    <h2 class="mb-4">Acciones de Usuarios</h2>
+    <partial name="_TablaAccionesPartial" model="Model" />
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+<script src="~/js/acciones.js"></script>

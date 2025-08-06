@@ -1,0 +1,54 @@
+<script>
+function showToast(message, type) {
+    var toastId = 'toast-' + Date.now();
+    var toastHtml = `<div id="${toastId}" class="toast align-items-center text-bg-` + type + ` border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3500">` +
+        `<div class="d-flex">` +
+        `<div class="toast-body">` + message + `</div>` +
+        `<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>` +
+        `</div></div>`;
+    var $toast = $(toastHtml);
+    $('#toast-container').append($toast);
+    var toast = new bootstrap.Toast($toast[0]);
+    toast.show();
+    $toast.on('hidden.bs.toast', function(){ $toast.remove(); });
+}
+function showDeleteModal(id, nombre) {
+    $("#deleteContactName").text(nombre);
+    $("#deleteForm").attr("action", '/Contactos/Delete/' + id);
+    $("#deleteModal").modal("show");
+}
+$(function(){
+    $('#deleteForm').on('submit', function(e){
+        e.preventDefault();
+        var form = $(this);
+        $.post(form.attr('action'), form.serialize(), function(data){
+            $('#deleteModal').modal('hide');
+            if(data && data.success !== undefined) {
+                if(data.success) {
+                    showToast(data.message || 'Contacto eliminado exitosamente.', 'success');
+                } else {
+                    showToast(data.html || 'Ocurrió un error al eliminar.', 'danger');
+                }
+                setTimeout(function(){ location.reload(); }, 1200);
+            } else {
+                location.reload();
+            }
+        });
+    });
+});
+</script>
+<div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080; min-width: 300px;">
+    <div id="toast-container"></div>
+</div>
+<script>
+    $(function(){
+        @if (TempData["Success"] != null)
+        {
+            <text>showToast('@TempData["Success"]'.replace(/'/g, "\'"), 'success');</text>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <text>showToast('@TempData["Error"]'.replace(/'/g, "\'"), 'danger');</text>
+        }
+    });
+</script>

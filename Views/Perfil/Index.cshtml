@@ -1,0 +1,38 @@
+@model ContactHUB.Models.Usuario
+@{
+    ViewData["Title"] = "Mi Perfil";
+}
+<div class="container py-5" style="max-width: 480px;">
+    <div class="text-center mb-4">
+        <div class="rounded-circle bg-primary bg-gradient d-inline-flex align-items-center justify-content-center mb-2" style="width: 64px; height: 64px;">
+            <i class="bi bi-person-circle text-white fs-1"></i>
+        </div>
+        <h2 class="fw-bold mb-1">Mi Perfil</h2>
+        <p class="text-muted mb-0">Gestiona tu información personal y credenciales.</p>
+    </div>
+    <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080; min-width: 300px;">
+        <div id="toast-container"></div>
+    </div>
+    @if (TempData["Success"] != null)
+    {
+        <script>window.perfilSuccess = '@TempData["Success"]'.replace(/'/g, "\'");</script>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <script>window.perfilError = '@TempData["Error"]'.replace(/'/g, "\'");</script>
+    }
+    @await Html.PartialAsync("Partials/_UserDataSection", Model)
+    @await Html.PartialAsync("Partials/_ChangePasswordSection", Model)
+</div>
+<style>
+    .btn-gradient-primary {
+        background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
+        border: none;
+        color: #fff;
+    }
+    .btn-gradient-primary:hover, .btn-gradient-primary:focus {
+        background: linear-gradient(90deg, #6610f2 0%, #0d6efd 100%);
+        color: #fff;
+    }
+</style>
+<script src="~/js/perfil.js" asp-append-version="true"></script>

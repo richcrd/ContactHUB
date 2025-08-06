@@ -1,0 +1,43 @@
+@model dynamic
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-3">
+        <label for="search" class="form-label mb-1">Buscar</label>
+        <input type="text" class="form-control" id="search" name="search" value="@Model.search" placeholder="Nombre, correo, teléfono..." />
+    </div>
+    <div class="col-md-3">
+        <label for="departamentoId" class="form-label mb-1">Departamento</label>
+        <select class="form-select" id="departamentoId" name="departamentoId">
+            <option value="">Todos</option>
+            @if (Model.departamentos != null)
+            {
+                foreach (var d in Model.departamentos)
+                {
+                    <option value="@d.IdDepartamento" selected="@(Model.departamentoId == d.IdDepartamento ? "selected" : null)">@d.Nombre</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="etiquetaId" class="form-label mb-1">Etiqueta</label>
+        <select class="form-select" id="etiquetaId" name="etiquetaId">
+            <option value="">Todas</option>
+            @if (Model.etiquetas != null)
+            {
+                foreach (var e in Model.etiquetas)
+                {
+                    <option value="@e.IdEtiqueta" selected="@(Model.etiquetaId == e.IdEtiqueta ? "selected" : null)">@e.Nombre</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label for="orden" class="form-label mb-1">Ordenar por</label>
+        <select class="form-select" id="orden" name="orden">
+            <option value="recientes" selected="@(Model.orden == "recientes" ? "selected" : null)">Agregados Recientes</option>
+            <option value="antiguos" selected="@(Model.orden == "antiguos" ? "selected" : null)">Más Antiguos</option>
+        </select>
+    </div>
+    <div class="col-md-1 d-grid">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filtrar</button>
+    </div>
+</form>

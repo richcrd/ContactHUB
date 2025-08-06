@@ -12,9 +12,24 @@ public class ContactDbContext : DbContext
     public DbSet<Etiqueta> Etiquetas { get; set; }
     public DbSet<Contacto> Contactos { get; set; }
     public DbSet<ContactoEtiqueta> ContactoEtiquetas { get; set; }
+    public DbSet<AccionUsuario> AccionUsuarios { get; set; }
+    public DbSet<RecuperacionIntento> RecuperacionIntentos { get; set; }
+    public DbSet<Rol> Roles { get; set; }
+    public DbSet<RecuperacionOtp> RecuperacionOtps { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Rol
+        modelBuilder.Entity<Rol>()
+            .HasMany(r => r.Usuarios)
+            .WithOne(u => u.Rol)
+            .HasForeignKey(u => u.IdRol)
+            .OnDelete(DeleteBehavior.Restrict);
+        // Seed roles
+        modelBuilder.Entity<Rol>().HasData(
+            new Rol { IdRol = 1, Nombre = "Admin" },
+            new Rol { IdRol = 2, Nombre = "Usuario" }
+        );
         // Estado
         modelBuilder.Entity<Estado>()
             .HasMany(e => e.Departamentos)
